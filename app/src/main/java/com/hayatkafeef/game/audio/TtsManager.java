@@ -20,12 +20,13 @@ public class TtsManager {
     private float rate = 1.0f;
 
     public TtsManager(Context ctx) {
-        this.tts = new TextToSpeech(ctx.getApplicationContext(), status -> {
+        final TextToSpeech[] holder = new TextToSpeech[1];
+        holder[0] = new TextToSpeech(ctx.getApplicationContext(), status -> {
             if (status == TextToSpeech.SUCCESS) {
                 // try ar first, then en
-                int r = tts.setLanguage(new Locale("ar"));
+                int r = holder[0].setLanguage(new Locale("ar"));
                 if (r == TextToSpeech.LANG_MISSING_DATA || r == TextToSpeech.LANG_NOT_SUPPORTED) {
-                    tts.setLanguage(Locale.ENGLISH);
+                    holder[0].setLanguage(Locale.ENGLISH);
                     spoken = Locale.ENGLISH;
                 }
                 ready = true;
@@ -33,6 +34,7 @@ public class TtsManager {
                 Log.w(TAG, "TTS init failed: " + status);
             }
         });
+        this.tts = holder[0];
         tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
             @Override public void onStart(String utteranceId) {}
             @Override public void onDone(String utteranceId) {}
