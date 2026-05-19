@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_title"
+            android:textColor="@color/primary"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <!-- Vision mode group -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/setting_vision_mode"
+            style="@style/CardTitle" />
+
+        <Spinner
+            android:id="@+id/sp_vision"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/card_bg" />
+
+        <!-- TTS rate -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/setting_tts_rate"
+            style="@style/CardTitle" />
+
+        <SeekBar
+            android:id="@+id/sb_tts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="200"
+            android:progress="100" />
+
+        <!-- Vibration -->
+        <CheckBox
+            android:id="@+id/cb_vibration"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="@string/setting_vibration"
+            android:textColor="@color/text_primary"
+            android:textSize="17sp"
+            android:checked="true" />
+
+        <!-- Spatial audio -->
+        <CheckBox
+            android:id="@+id/cb_spatial"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/setting_spatial_audio"
+            android:textColor="@color/text_primary"
+            android:textSize="17sp"
+            android:checked="true" />
+
+        <!-- AI proxy -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/setting_ai_proxy"
+            style="@style/CardTitle" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/setting_ai_proxy_hint"
+            style="@style/BodyText" />
+
+        <EditText
+            android:id="@+id/et_proxy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="https://your-proxy.example.com/chat"
+            android:inputType="textUri"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary"
+            android:layout_marginTop="6dp" />
+
+        <Button
+            android:id="@+id/btn_test_proxy"
+            style="@style/GhostButton"
+            android:text="@string/setting_ai_test" />
+
+        <!-- Reset -->
+        <Button
+            android:id="@+id/btn_reset"
+            style="@style/GhostButton"
+            android:layout_marginTop="24dp"
+            android:text="@string/setting_reset" />
+
+        <Button
+            android:id="@+id/btn_save"
+            style="@style/BigButton"
+            android:text="@string/setting_save" />
+
+    </LinearLayout>
+</ScrollView>

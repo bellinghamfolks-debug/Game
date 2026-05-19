@@ -1,0 +1,79 @@
+name: Build Hayat Kafeef APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+      - 'claude/**'
+  pull_request:
+    branches:
+      - main
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build debug APK
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Preflight project structure
+        run: |
+          set -e
+          test -f settings.gradle
+          test -f build.gradle
+          test -f gradle.properties
+          test -f app/build.gradle
+          test -f app/src/main/AndroidManifest.xml
+          test -f app/src/main/java/com/hayatkafeef/game/MainActivity.java
+          test -f app/src/main/java/com/hayatkafeef/game/GameActivity.java
+          test -f app/src/main/res/values/strings.xml
+          echo "Preflight OK"
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-34 build-tools;34.0.0 platform-tools'
+
+      - name: Set up Gradle 8.5
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.5'
+
+      - name: Regenerate Gradle wrapper
+        run: |
+          gradle wrapper --gradle-version 8.5 --distribution-type bin
+          chmod +x ./gradlew
+          ./gradlew --version
+
+      - name: Build debug APK
+        run: ./gradlew :app:assembleDebug --no-daemon --stacktrace
+
+      - name: List build outputs
+        if: always()
+        run: |
+          echo "--- APK files ---"
+          find app/build/outputs -name '*.apk' -print -exec ls -la {} \; || true
+
+      - name: Upload APK artifact
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: HayatKafeef-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 30

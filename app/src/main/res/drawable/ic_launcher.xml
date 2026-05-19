@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#0E1116"
+        android:pathData="M0,0h108v108h-108z" />
+    <!-- Eye outline -->
+    <path
+        android:fillColor="#E0C36A"
+        android:pathData="M22,54
+            C 34,38 74,38 86,54
+            C 74,70 34,70 22,54 Z" />
+    <!-- Iris -->
+    <path
+        android:fillColor="#0E1116"
+        android:pathData="M44,54
+            a 10,10 0 1,0 20,0
+            a 10,10 0 1,0 -20,0 Z" />
+    <!-- Cane diagonal -->
+    <path
+        android:fillColor="#EEEEEE"
+        android:pathData="M70,32 l8,4 -42,46 -8,-4 Z" />
+    <!-- Cane tip -->
+    <path
+        android:fillColor="#E07474"
+        android:pathData="M28,78 l8,4 -4,8 -8,-4 Z" />
+</vector>

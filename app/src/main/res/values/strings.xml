@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="ar">
+
+    <string name="app_name">حياة كفيف</string>
+    <string name="game_title">حياة كفيف</string>
+    <string name="manual_title">دليل المستخدم</string>
+    <string name="settings_title">الإعدادات</string>
+
+    <!-- Main menu -->
+    <string name="menu_new_game">قصة جديدة</string>
+    <string name="menu_continue">متابعة الحياة السابقة</string>
+    <string name="menu_manual">دليل المستخدم</string>
+    <string name="menu_settings">الإعدادات</string>
+    <string name="menu_about">عن اللعبة</string>
+    <string name="menu_exit">خروج</string>
+
+    <string name="intro_title">حياة كفيف</string>
+    <string name="intro_tagline">عش الحياة من زاوية لم ترَها من قبل</string>
+    <string name="intro_subtitle">لعبة قصة وتجربة، مصممة بإمكانية وصول كاملة</string>
+
+    <!-- Vision modes -->
+    <string name="vision_pick_title">اختر حالة الرؤية</string>
+    <string name="vision_pick_hint">هذا الاختيار يغير طريقة عرض اللعبة ولا يغير القصة. يمكنك تغييره لاحقًا.</string>
+    <string name="vision_total">كفيف كلي</string>
+    <string name="vision_total_desc">شاشة سوداء، اعتماد كامل على الصوت والوصف والاهتزاز</string>
+    <string name="vision_low">ضعف بصر شديد</string>
+    <string name="vision_low_desc">ترى أشكالًا كبيرة وألوانًا تقريبية فقط</string>
+    <string name="vision_blur">رؤية ضبابية</string>
+    <string name="vision_blur_desc">كل شيء ضبابي، يصعب تمييز التفاصيل والوجوه</string>
+    <string name="vision_central">رؤية مركزية فقط</string>
+    <string name="vision_central_desc">دائرة صغيرة في المنتصف، الباقي مظلم</string>
+    <string name="vision_peripheral">رؤية طرفية فقط</string>
+    <string name="vision_peripheral_desc">المنتصف مظلم، ترى الحواف فقط</string>
+    <string name="vision_sighted">مبصر (لمحاكاة الفرق)</string>
+    <string name="vision_sighted_desc">رؤية كاملة. يمكنك أيضًا تجربة الوضع الصوتي من الإعدادات.</string>
+
+    <!-- Gestures -->
+    <string name="gesture_swipe_up">سحب للأعلى = مشي للأمام</string>
+    <string name="gesture_swipe_down">سحب للأسفل = توقف</string>
+    <string name="gesture_swipe_right">سحب يمين = استدارة يمين</string>
+    <string name="gesture_swipe_left">سحب يسار = استدارة يسار</string>
+    <string name="gesture_double_tap">نقرتان = تفاعل</string>
+    <string name="gesture_long_press">ضغط مطوّل = وصف ما حولك</string>
+    <string name="gesture_shake">هز الجهاز = إعادة تحديد الاتجاه</string>
+
+    <!-- Settings -->
+    <string name="setting_vision_mode">حالة الرؤية</string>
+    <string name="setting_tts_rate">سرعة الصوت</string>
+    <string name="setting_vibration">الاهتزازات</string>
+    <string name="setting_spatial_audio">صوت اتجاهي</string>
+    <string name="setting_ai_proxy">رابط مساعد الذكاء الاصطناعي</string>
+    <string name="setting_ai_proxy_hint">اختياري. إذا تركته فارغًا، ستعمل اللعبة بقوالب وصف ذكية بدون إنترنت.</string>
+    <string name="setting_ai_test">اختبر الاتصال</string>
+    <string name="setting_reset">إعادة تعيين الحياة</string>
+    <string name="setting_save">حفظ</string>
+    <string name="setting_back">رجوع</string>
+
+    <!-- Game HUD -->
+    <string name="hud_location">المكان: %1$s</string>
+    <string name="hud_time">الوقت: %1$s</string>
+    <string name="hud_stat_mobility">الحركة</string>
+    <string name="hud_stat_social">العلاقات</string>
+    <string name="hud_stat_tech">التقنية</string>
+    <string name="hud_stat_confidence">الثقة</string>
+    <string name="hud_paused">متوقفة</string>
+
+    <!-- Locations -->
+    <string name="loc_home">البيت</string>
+    <string name="loc_street">الشارع</string>
+    <string name="loc_university">الجامعة</string>
+    <string name="loc_cafe">المقهى</string>
+
+    <!-- Dialogue -->
+    <string name="say_hello">السلام عليكم</string>
+    <string name="say_ask_help">ممكن مساعدة؟</string>
+    <string name="say_thanks">شكرًا لك</string>
+    <string name="say_goodbye">إلى اللقاء</string>
+    <string name="say_who">من معي؟</string>
+
+    <!-- Buttons -->
+    <string name="btn_start">ابدأ</string>
+    <string name="btn_skip">تخطي</string>
+    <string name="btn_continue">متابعة</string>
+    <string name="btn_close">إغلاق</string>
+    <string name="btn_pause">إيقاف مؤقت</string>
+    <string name="btn_resume">متابعة اللعب</string>
+    <string name="btn_quick_help">المساعدة السريعة</string>
+
+    <!-- A11y -->
+    <string name="a11y_game_canvas">منطقة اللعب. اسحب للأعلى للمشي، أو اضغط مطولًا لتسمع وصف ما حولك.</string>
+    <string name="a11y_describe">صِف البيئة</string>
+    <string name="a11y_interact">تفاعل مع أقرب شيء</string>
+    <string name="a11y_turn_left">استدارة يسار</string>
+    <string name="a11y_turn_right">استدارة يمين</string>
+    <string name="a11y_walk">مشي</string>
+    <string name="a11y_stop">توقف</string>
+    <string name="a11y_pause_game">إيقاف اللعبة</string>
+    <string name="a11y_open_menu">قائمة سريعة</string>
+
+    <!-- Onboarding lines (spoken) -->
+    <string name="onb_1">أهلًا بك في حياة كفيف. هذه اللعبة تُروى لك بالصوت قبل الصورة.</string>
+    <string name="onb_2">جرب الآن. اضغط مطوّلًا على الشاشة لتسمع وصفًا لما حولك.</string>
+    <string name="onb_3">جيد. اسحب للأعلى لتمشي خطوة للأمام.</string>
+    <string name="onb_4">رائع. اسحب يمينًا أو يسارًا لتغيير اتجاهك.</string>
+    <string name="onb_5">عندما تقترب من شخص أو شيء، انقر مرتين للتفاعل.</string>
+    <string name="onb_6">في أي وقت، هز الجهاز لتعيد ضبط اتجاهك أو هز قليلًا للمساعدة.</string>
+    <string name="onb_done">تم. الحياة بين يديك الآن. صباح الخير.</string>
+
+    <!-- Events / story snippets -->
+    <string name="ev_bus_arrive">سمعتَ صوت محرك حافلة يقترب على يسارك.</string>
+    <string name="ev_door_open">صوت باب يُفتح أمامك.</string>
+    <string name="ev_friend_calls">صديقك ينادي اسمك من الخلف.</string>
+    <string name="ev_lecture_start">انتبه، المحاضرة بدأت قبل دقيقتين.</string>
+    <string name="ev_rain_starts">قطرات مطر خفيفة تبدأ بالنزول.</string>
+    <string name="ev_elevator_down">المصعد عطلان اليوم، يبدو أنك ستستخدم الدرج.</string>
+
+    <!-- Manual / errors / misc -->
+    <string name="msg_saved">تم حفظ تقدمك.</string>
+    <string name="msg_no_save">لا توجد حياة محفوظة بعد. ابدأ قصة جديدة.</string>
+    <string name="msg_proxy_ok">اتصال المساعد يعمل.</string>
+    <string name="msg_proxy_fail">تعذر الاتصال بمساعد الذكاء الاصطناعي. ستعمل اللعبة بدون إنترنت.</string>
+    <string name="msg_offline_mode">وضع بدون إنترنت — الوصف يعتمد على قوالب ذكية.</string>
+    <string name="msg_reset_confirm">سيتم محو تقدمك. هل أنت متأكد؟</string>
+    <string name="msg_yes">نعم</string>
+    <string name="msg_no">لا</string>
+
+    <!-- About -->
+    <string name="about_text">حياة كفيف · لعبة قصة وتجربة\nمصممة لإمكانية الوصول الكاملة، تعمل مع TalkBack ومع وضع المبصر.\nالنسخة 1.0</string>
+
+</resources>

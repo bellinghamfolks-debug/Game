@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="bg">#FF0E1116</color>
+    <color name="bg_card">#FF1A1F26</color>
+    <color name="primary">#FFE0C36A</color>
+    <color name="primary_dark">#FFB58F2C</color>
+    <color name="text_primary">#FFF1F1F1</color>
+    <color name="text_secondary">#FFB8B8B8</color>
+    <color name="accent">#FF6BC2A8</color>
+    <color name="danger">#FFE07474</color>
+    <color name="cane">#FFEEEEEE</color>
+
+    <!-- Scene palette -->
+    <color name="sky_day">#FF8FB7D6</color>
+    <color name="sky_dusk">#FFD9925C</color>
+    <color name="road">#FF3B3F46</color>
+    <color name="grass">#FF4F7A4A</color>
+    <color name="wall">#FF6B5A48</color>
+    <color name="person_a">#FFE0B07E</color>
+    <color name="person_b">#FFB58970</color>
+    <color name="door">#FF8B5A2B</color>
+    <color name="window">#FF98C7F0</color>
+    <color name="player">#FF222933</color>
+</resources>
