@@ -17,8 +17,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="#A0000000"
-        android:padding="10dp">
+        android:background="@drawable/hud_top"
+        android:padding="14dp">
 
         <TextView
             android:id="@+id/hud_location"
@@ -51,8 +51,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:orientation="horizontal"
-        android:padding="6dp"
-        android:background="#B0000000">
+        android:padding="10dp"
+        android:background="@drawable/hud_bottom">
 
         <Button
             android:id="@+id/a_left"
