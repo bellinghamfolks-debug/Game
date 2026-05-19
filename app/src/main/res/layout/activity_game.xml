@@ -95,6 +95,14 @@
             android:contentDescription="@string/a11y_interact" />
 
         <Button
+            android:id="@+id/a_nav"
+            style="@style/GhostButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="🧭"
+            android:contentDescription="@string/a11y_navigate" />
+
+        <Button
             android:id="@+id/a_pause"
             style="@style/GhostButton"
             android:layout_width="0dp"

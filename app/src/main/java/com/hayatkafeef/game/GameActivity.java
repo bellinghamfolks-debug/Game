@@ -120,6 +120,7 @@ public class GameActivity extends Activity implements GameEngine.View {
         });
         findViewById(R.id.a_describe).setOnClickListener(v -> engine.cmdDescribe());
         findViewById(R.id.a_interact).setOnClickListener(v -> engine.cmdInteract());
+        findViewById(R.id.a_nav).setOnClickListener(v -> openNavMenu());
         findViewById(R.id.a_pause).setOnClickListener(v -> togglePause());
 
         // welcome
@@ -156,6 +157,60 @@ public class GameActivity extends Activity implements GameEngine.View {
     private void save() {
         if (engine == null || engine.state() == null) return;
         prefs.writeSave(engine.state().toBlob());
+    }
+
+    private void openNavMenu() {
+        if (engine == null || engine.state() == null || engine.state().scene == null) return;
+
+        // already guiding? offer to cancel.
+        if (engine.nav().isActive()) {
+            new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert)
+                    .setMessage(R.string.nav_already_active)
+                    .setPositiveButton(R.string.msg_yes, (d, w) -> engine.cancelNavigation())
+                    .setNegativeButton(R.string.msg_no, null)
+                    .show();
+            tts.speakNow(getString(R.string.nav_already_active));
+            return;
+        }
+
+        // Build the list of meaningful, named entities in the current scene.
+        final java.util.List<com.hayatkafeef.game.game.Entity> targets = new java.util.ArrayList<>();
+        for (com.hayatkafeef.game.game.Entity e : engine.state().scene.entities) {
+            if (e.name == null || e.name.isEmpty()) continue;
+            targets.add(e);
+        }
+        if (targets.isEmpty()) {
+            Toast.makeText(this, R.string.nav_no_targets, Toast.LENGTH_LONG).show();
+            tts.speakNow(getString(R.string.nav_no_targets));
+            return;
+        }
+        // Sort by distance so the most relevant items are at the top.
+        final float px = engine.state().player.x;
+        final float py = engine.state().player.y;
+        java.util.Collections.sort(targets, (a, b) -> {
+            float da = (a.x - px) * (a.x - px) + (a.y - py) * (a.y - py);
+            float db = (b.x - px) * (b.x - px) + (b.y - py) * (b.y - py);
+            return Float.compare(da, db);
+        });
+
+        String[] labels = new String[targets.size()];
+        for (int i = 0; i < targets.size(); i++) {
+            com.hayatkafeef.game.game.Entity e = targets.get(i);
+            float d = (float) Math.hypot(e.x - px, e.y - py);
+            int steps = Math.max(1, Math.round(d));
+            String suffix = e.tag != null && !e.tag.isEmpty() ? " (" + e.tag + ")" : "";
+            labels[i] = e.name + suffix + " — " + steps + " خطوة تقريبًا";
+        }
+
+        AlertDialog.Builder b = new AlertDialog.Builder(this, android.R.style.Theme_Material_Dialog_Alert);
+        b.setTitle(R.string.nav_title);
+        b.setItems(labels, (d, which) -> engine.startNavigation(targets.get(which)));
+        b.setNegativeButton(R.string.btn_close, null);
+        AlertDialog dlg = b.create();
+        dlg.show();
+
+        // Announce the title so screen readers and audio-only players hear it.
+        tts.speakNow(getString(R.string.nav_title));
     }
 
     private void togglePause() {

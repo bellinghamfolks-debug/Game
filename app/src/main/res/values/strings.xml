@@ -102,6 +102,13 @@
     <string name="a11y_stop">توقف</string>
     <string name="a11y_pause_game">إيقاف اللعبة</string>
     <string name="a11y_open_menu">قائمة سريعة</string>
+    <string name="a11y_navigate">المرشد الصوتي. خذني إلى…</string>
+
+    <string name="nav_title">إلى أين تريد الذهاب؟</string>
+    <string name="nav_hint">سأرشدك خطوة بخطوة. اختر وجهة من القائمة، أو اضغط إلغاء.</string>
+    <string name="nav_cancel">إلغاء الإرشاد</string>
+    <string name="nav_no_targets">لا توجد وجهات قريبة في هذا المكان.</string>
+    <string name="nav_already_active">الإرشاد فعّال الآن. هل تريد إلغاءه؟</string>
 
     <!-- Onboarding lines (spoken) -->
     <string name="onb_1">أهلًا بك في حياة كفيف. هذه اللعبة تُروى لك بالصوت قبل الصورة.</string>

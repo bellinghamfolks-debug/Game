@@ -93,6 +93,13 @@
     <string name="a11y_stop">Stop</string>
     <string name="a11y_pause_game">Pause game</string>
     <string name="a11y_open_menu">Quick menu</string>
+    <string name="a11y_navigate">Voice guide. Take me to…</string>
+
+    <string name="nav_title">Where do you want to go?</string>
+    <string name="nav_hint">I will guide you step by step. Pick a destination, or cancel.</string>
+    <string name="nav_cancel">Cancel guidance</string>
+    <string name="nav_no_targets">No destinations nearby in this place.</string>
+    <string name="nav_already_active">Guidance is active. Cancel it?</string>
 
     <string name="onb_1">Welcome to Blind Life. This game is told to you in sound before image.</string>
     <string name="onb_2">Try now. Long-press the screen and you will hear what surrounds you.</string>

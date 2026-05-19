@@ -5,6 +5,7 @@ import android.os.Handler;
 import android.os.Looper;
 
 import com.hayatkafeef.game.ai.EnvDescriber;
+import com.hayatkafeef.game.ai.NavGuide;
 import com.hayatkafeef.game.audio.SpatialAudio;
 import com.hayatkafeef.game.audio.TtsManager;
 import com.hayatkafeef.game.haptics.HapticManager;
@@ -30,6 +31,7 @@ public class GameEngine implements EventSystem.Effects {
     private final GameView gameView;
     private final View bridge;
     private final EventSystem events = new EventSystem();
+    private final NavGuide nav = new NavGuide();
     private final Handler main = new Handler(Looper.getMainLooper());
 
     private GameState state = new GameState();
@@ -129,7 +131,35 @@ public class GameEngine implements EventSystem.Effects {
             bridge.onMessage(ev);
         }
 
+        // live navigation updates
+        if (nav.isActive()) {
+            String guidance = nav.tick(state);
+            if (guidance != null) {
+                tts.speak(guidance);
+                bridge.onMessage(guidance);
+            }
+        }
+
         bridge.onState(state);
+    }
+
+    // ---- navigation ----
+
+    public NavGuide nav() { return nav; }
+
+    public void startNavigation(Entity target) {
+        if (target == null) return;
+        String intro = nav.start(state, target);
+        tts.speakNow(intro);
+        bridge.onMessage(intro);
+        haptics.confirm();
+    }
+
+    public void cancelNavigation() {
+        if (!nav.isActive()) return;
+        nav.cancel();
+        tts.speakNow("ألغيتُ الإرشاد.");
+        haptics.confirm();
     }
 
     private boolean collides(float x, float y) {
