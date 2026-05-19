@@ -69,11 +69,77 @@
             android:textSize="17sp"
             android:checked="true" />
 
-        <!-- AI proxy -->
+        <!-- AI section -->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="24dp"
+            android:text="@string/setting_ai_section"
+            android:textColor="@color/primary"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <!-- Gemini key (the easy way) -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text="@string/setting_gemini_key"
+            style="@style/CardTitle" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/setting_gemini_key_hint"
+            style="@style/BodyText" />
+
+        <EditText
+            android:id="@+id/et_gemini_key"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="AIza…"
+            android:inputType="textPassword"
+            android:autofillHints="password"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary"
+            android:layout_marginTop="6dp" />
+
+        <Button
+            android:id="@+id/btn_get_key"
+            style="@style/GhostButton"
+            android:text="@string/setting_get_key" />
+
+        <!-- Gemini model -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="@string/setting_gemini_model"
+            style="@style/CardTitle" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/setting_gemini_model_hint"
+            style="@style/BodyText" />
+
+        <EditText
+            android:id="@+id/et_gemini_model"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="gemini-2.5-flash"
+            android:inputType="text"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary"
+            android:layout_marginTop="6dp" />
+
+        <!-- Proxy (advanced) -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
             android:text="@string/setting_ai_proxy"
             style="@style/CardTitle" />
 

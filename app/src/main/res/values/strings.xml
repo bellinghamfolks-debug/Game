@@ -48,8 +48,14 @@
     <string name="setting_tts_rate">سرعة الصوت</string>
     <string name="setting_vibration">الاهتزازات</string>
     <string name="setting_spatial_audio">صوت اتجاهي</string>
-    <string name="setting_ai_proxy">رابط مساعد الذكاء الاصطناعي</string>
-    <string name="setting_ai_proxy_hint">اختياري. إذا تركته فارغًا، ستعمل اللعبة بقوالب وصف ذكية بدون إنترنت.</string>
+    <string name="setting_ai_section">الذكاء الاصطناعي</string>
+    <string name="setting_gemini_key">مفتاح Gemini</string>
+    <string name="setting_gemini_key_hint">الأسهل: ألصق مفتاحك من Google AI Studio (aistudio.google.com). يُحفظ على جهازك فقط ويُرسل إلى Google مباشرة، بدون أي خادم وسيط.</string>
+    <string name="setting_gemini_model">موديل Gemini</string>
+    <string name="setting_gemini_model_hint">الافتراضي: gemini-2.5-flash (أسرع وأرخص). يمكنك كتابة gemini-2.5-pro لجودة أعلى.</string>
+    <string name="setting_get_key">احصل على مفتاح Gemini</string>
+    <string name="setting_ai_proxy">رابط بروكسي (متقدم/اختياري)</string>
+    <string name="setting_ai_proxy_hint">للمستخدمين الذين يفضلون أن يبقى المفتاح على خادم. اتركه فارغًا إذا كنت تستخدم مفتاح Gemini أعلاه.</string>
     <string name="setting_ai_test">اختبر الاتصال</string>
     <string name="setting_reset">إعادة تعيين الحياة</string>
     <string name="setting_save">حفظ</string>
@@ -119,6 +125,10 @@
     <string name="msg_no_save">لا توجد حياة محفوظة بعد. ابدأ قصة جديدة.</string>
     <string name="msg_proxy_ok">اتصال المساعد يعمل.</string>
     <string name="msg_proxy_fail">تعذر الاتصال بمساعد الذكاء الاصطناعي. ستعمل اللعبة بدون إنترنت.</string>
+    <string name="msg_ai_mode_gemini">يعمل بمفتاح Gemini مباشرة.</string>
+    <string name="msg_ai_mode_proxy">يعمل عبر بروكسي مخصص.</string>
+    <string name="msg_ai_mode_offline">يعمل بدون إنترنت بقوالب ذكية.</string>
+    <string name="msg_key_required">أدخل مفتاح Gemini أولًا.</string>
     <string name="msg_offline_mode">وضع بدون إنترنت — الوصف يعتمد على قوالب ذكية.</string>
     <string name="msg_reset_confirm">سيتم محو تقدمك. هل أنت متأكد؟</string>
     <string name="msg_yes">نعم</string>

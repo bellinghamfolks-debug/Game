@@ -2,6 +2,8 @@ package com.hayatkafeef.game;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -30,7 +32,10 @@ public class SettingsActivity extends Activity {
         final SeekBar sb = findViewById(R.id.sb_tts);
         final CheckBox cbVib = findViewById(R.id.cb_vibration);
         final CheckBox cbSpa = findViewById(R.id.cb_spatial);
-        final EditText et = findViewById(R.id.et_proxy);
+        final EditText etKey = findViewById(R.id.et_gemini_key);
+        final EditText etModel = findViewById(R.id.et_gemini_model);
+        final EditText etProxy = findViewById(R.id.et_proxy);
+        final Button getKeyBtn = findViewById(R.id.btn_get_key);
         final Button testBtn = findViewById(R.id.btn_test_proxy);
         final Button resetBtn = findViewById(R.id.btn_reset);
         final Button saveBtn = findViewById(R.id.btn_save);
@@ -50,20 +55,38 @@ public class SettingsActivity extends Activity {
         sb.setProgress(prefs.ttsRate());
         cbVib.setChecked(prefs.vibrationEnabled());
         cbSpa.setChecked(prefs.spatialAudio());
-        et.setText(prefs.proxyUrl());
+        etKey.setText(prefs.geminiKey());
+        etModel.setText(prefs.geminiModel());
+        etProxy.setText(prefs.proxyUrl());
+
+        getKeyBtn.setOnClickListener(v -> {
+            try {
+                startActivity(new Intent(Intent.ACTION_VIEW,
+                        Uri.parse("https://aistudio.google.com/app/apikey")));
+            } catch (Exception ignored) {}
+        });
 
         testBtn.setOnClickListener(v -> {
-            String url = et.getText().toString().trim();
-            if (url.isEmpty()) {
-                Toast.makeText(this, R.string.msg_offline_mode, Toast.LENGTH_SHORT).show();
+            // Save current edits first so the test reflects them.
+            String key = etKey.getText().toString().trim();
+            String model = etModel.getText().toString().trim();
+            String proxy = etProxy.getText().toString().trim();
+            AiClient client = AiClient.fromPrefs(key, model, proxy);
+            if (!client.isConfigured()) {
+                Toast.makeText(this, R.string.msg_key_required, Toast.LENGTH_LONG).show();
                 return;
             }
-            new AiClient(url).test(new AiClient.Callback() {
+            Toast.makeText(this, R.string.setting_ai_test, Toast.LENGTH_SHORT).show();
+            client.test(new AiClient.Callback() {
                 @Override public void onReply(String text) {
-                    Toast.makeText(SettingsActivity.this, R.string.msg_proxy_ok, Toast.LENGTH_SHORT).show();
+                    int msg = client.mode() == AiClient.Mode.GEMINI
+                            ? R.string.msg_ai_mode_gemini : R.string.msg_ai_mode_proxy;
+                    Toast.makeText(SettingsActivity.this, msg, Toast.LENGTH_LONG).show();
                 }
                 @Override public void onError(String msg) {
-                    Toast.makeText(SettingsActivity.this, R.string.msg_proxy_fail, Toast.LENGTH_LONG).show();
+                    Toast.makeText(SettingsActivity.this,
+                            getString(R.string.msg_proxy_fail) + "\n" + msg,
+                            Toast.LENGTH_LONG).show();
                 }
             });
         });
@@ -82,7 +105,9 @@ public class SettingsActivity extends Activity {
             prefs.setTtsRate(sb.getProgress());
             prefs.setVibrationEnabled(cbVib.isChecked());
             prefs.setSpatialAudio(cbSpa.isChecked());
-            prefs.setProxyUrl(et.getText().toString().trim());
+            prefs.setGeminiKey(etKey.getText().toString());
+            prefs.setGeminiModel(etModel.getText().toString());
+            prefs.setProxyUrl(etProxy.getText().toString().trim());
             Toast.makeText(this, R.string.msg_saved, Toast.LENGTH_SHORT).show();
             finish();
         });

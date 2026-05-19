@@ -14,9 +14,13 @@ public class Prefs {
     private static final String K_VIBRATION = "vibration";
     private static final String K_SPATIAL = "spatial";
     private static final String K_PROXY = "ai_proxy_url";
+    private static final String K_GEMINI_KEY = "gemini_api_key";
+    private static final String K_GEMINI_MODEL = "gemini_model";
     private static final String K_HAS_SAVE = "has_save";
     private static final String K_SAVE_BLOB = "save_blob";
     private static final String K_ONBOARDED = "onboarded";
+
+    public static final String DEFAULT_GEMINI_MODEL = "gemini-2.5-flash";
 
     private final SharedPreferences sp;
 
@@ -40,6 +44,14 @@ public class Prefs {
 
     public String proxyUrl() { return sp.getString(K_PROXY, ""); }
     public void setProxyUrl(String v) { sp.edit().putString(K_PROXY, v == null ? "" : v).apply(); }
+
+    public String geminiKey() { return sp.getString(K_GEMINI_KEY, ""); }
+    public void setGeminiKey(String v) { sp.edit().putString(K_GEMINI_KEY, v == null ? "" : v.trim()).apply(); }
+
+    public String geminiModel() { return sp.getString(K_GEMINI_MODEL, DEFAULT_GEMINI_MODEL); }
+    public void setGeminiModel(String v) {
+        sp.edit().putString(K_GEMINI_MODEL, (v == null || v.trim().isEmpty()) ? DEFAULT_GEMINI_MODEL : v.trim()).apply();
+    }
 
     public boolean hasSave() { return sp.getBoolean(K_HAS_SAVE, false); }
     public String saveBlob() { return sp.getString(K_SAVE_BLOB, ""); }

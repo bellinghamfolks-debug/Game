@@ -65,7 +65,7 @@ public class GameActivity extends Activity implements GameEngine.View {
         audio.setEnabled(prefs.spatialAudio());
         haptics = new HapticManager(this);
         haptics.setEnabled(prefs.vibrationEnabled());
-        ai = new AiClient(prefs.proxyUrl());
+        ai = AiClient.fromPrefs(prefs.geminiKey(), prefs.geminiModel(), prefs.proxyUrl());
 
         gameView = findViewById(R.id.game_view);
         hudLocation = findViewById(R.id.hud_location);
