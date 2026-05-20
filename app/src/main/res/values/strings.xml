@@ -49,6 +49,14 @@
     <string name="setting_vibration">الاهتزازات</string>
     <string name="setting_spatial_audio">صوت اتجاهي</string>
     <string name="setting_ai_section">الذكاء الاصطناعي</string>
+    <string name="setting_ai_enable">تفعيل الذكاء الاصطناعي</string>
+    <string name="setting_ai_mode">مستوى الذكاء</string>
+    <string name="setting_ai_mode_off">إيقاف</string>
+    <string name="setting_ai_mode_basic">بسيط (تحسين الحوار والوصف)</string>
+    <string name="setting_ai_mode_advanced">متقدم (يتكيف مع أسلوبك)</string>
+    <string name="setting_ai_analysis">السماح بتحليل أسلوب اللعب</string>
+    <string name="setting_clear_memory">حذف ذاكرة الشخصيات</string>
+    <string name="msg_memory_cleared">تم حذف ذاكرة الشخصيات.</string>
     <string name="setting_gemini_key">مفتاح Gemini</string>
     <string name="setting_gemini_key_hint">الأسهل: ألصق مفتاحك من Google AI Studio (aistudio.google.com). يُحفظ على جهازك فقط ويُرسل إلى Google مباشرة، بدون أي خادم وسيط.</string>
     <string name="setting_gemini_model">موديل Gemini</string>
@@ -103,6 +111,15 @@
     <string name="a11y_pause_game">إيقاف اللعبة</string>
     <string name="a11y_open_menu">قائمة سريعة</string>
     <string name="a11y_navigate">المرشد الصوتي. خذني إلى…</string>
+    <string name="a11y_hint">تلميح ذكي عن المهمة الحالية</string>
+    <string name="a11y_repeat">كرّر آخر رسالة</string>
+
+    <string name="menu_mission_status">ما المهمة الآن؟</string>
+    <string name="menu_event_log">سجل الأحداث</string>
+    <string name="menu_day_summary">ملخص اليوم</string>
+
+    <string name="msg_log_empty">لم يحدث شيء بعد. تحرك أو تحدّث مع أحد.</string>
+    <string name="msg_summary_loading">أحضّر ملخص اليوم…</string>
 
     <string name="nav_title">إلى أين تريد الذهاب؟</string>
     <string name="nav_hint">سأرشدك خطوة بخطوة. اختر وجهة من القائمة، أو اضغط إلغاء.</string>

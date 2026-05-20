@@ -5,13 +5,20 @@ public class Scenes {
 
     public static Scene home() {
         Scene s = new Scene(Scene.Id.HOME, "البيت", 16, 12, 0x0E1116, 0x6B5A48, 0x8B5A2B, 1);
-        s.add(new Entity(Entity.Kind.BED, 2.0f, 2.0f, 1.2f, "سرير").tag("سريرك").id("bed"));
+        // The bed also hosts the alarm. Interacting with it stops the alarm.
+        s.add(new Entity(Entity.Kind.BED, 2.0f, 2.0f, 1.2f, "سرير")
+                .tag("سريرك — صوت منبه قادم منه")
+                .id("bed")
+                .sound(880, 2));
         s.add(new Entity(Entity.Kind.DESK, 12.0f, 2.0f, 1.0f, "مكتب").tag("مكتبك").id("desk"));
+        // The cane rests against the desk — short, low-profile entity.
+        s.add(new Entity(Entity.Kind.PILLAR, 13.2f, 3.0f, 0.35f, "عصاك")
+                .tag("عصا المشي البيضاء")
+                .id("cane"));
         s.add(new Entity(Entity.Kind.WALL, 8.0f, 6.0f, 0.6f, "عمود").tag("عمود في المنتصف").id("pillar1"));
         Entity door = new Entity(Entity.Kind.DOOR, 14.5f, 10.0f, 0.8f, "باب البيت").tag("باب يخرج للشارع").id("door_to_street");
         s.add(door);
         s.exits.put("door_to_street", Scene.Id.STREET);
-        // a clock making sound, helpful spatial cue
         s.add(new Entity(Entity.Kind.PILLAR, 1.0f, 10.0f, 0.4f, "ساعة حائط").tag("تكتك خفيف").id("clock").sound(440, 1));
         return s;
     }

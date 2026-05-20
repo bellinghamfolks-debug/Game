@@ -45,6 +45,14 @@
     <string name="setting_vibration">Vibration</string>
     <string name="setting_spatial_audio">Spatial audio</string>
     <string name="setting_ai_section">AI</string>
+    <string name="setting_ai_enable">Enable AI</string>
+    <string name="setting_ai_mode">AI level</string>
+    <string name="setting_ai_mode_off">Off</string>
+    <string name="setting_ai_mode_basic">Basic (richer dialogue + narration)</string>
+    <string name="setting_ai_mode_advanced">Advanced (adapts to your style)</string>
+    <string name="setting_ai_analysis">Allow play-style analysis</string>
+    <string name="setting_clear_memory">Clear character memory</string>
+    <string name="msg_memory_cleared">Character memory cleared.</string>
     <string name="setting_gemini_key">Gemini API key</string>
     <string name="setting_gemini_key_hint">Easiest path: paste your key from Google AI Studio (aistudio.google.com). Stored only on your device and sent only to Google. No proxy needed.</string>
     <string name="setting_gemini_model">Gemini model</string>
@@ -94,6 +102,15 @@
     <string name="a11y_pause_game">Pause game</string>
     <string name="a11y_open_menu">Quick menu</string>
     <string name="a11y_navigate">Voice guide. Take me to…</string>
+    <string name="a11y_hint">Smart hint about the current mission</string>
+    <string name="a11y_repeat">Repeat last message</string>
+
+    <string name="menu_mission_status">What is my mission?</string>
+    <string name="menu_event_log">Event log</string>
+    <string name="menu_day_summary">Day summary</string>
+
+    <string name="msg_log_empty">Nothing has happened yet. Move or talk to someone.</string>
+    <string name="msg_summary_loading">Preparing today\'s summary…</string>
 
     <string name="nav_title">Where do you want to go?</string>
     <string name="nav_hint">I will guide you step by step. Pick a destination, or cancel.</string>

@@ -79,6 +79,45 @@
             android:textSize="22sp"
             android:textStyle="bold" />
 
+        <CheckBox
+            android:id="@+id/cb_ai_enabled"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/setting_ai_enable"
+            android:textColor="@color/text_primary"
+            android:textSize="17sp"
+            android:checked="true" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/setting_ai_mode"
+            style="@style/CardTitle" />
+
+        <Spinner
+            android:id="@+id/sp_ai_mode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/card_bg" />
+
+        <CheckBox
+            android:id="@+id/cb_ai_analysis"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="@string/setting_ai_analysis"
+            android:textColor="@color/text_primary"
+            android:textSize="16sp"
+            android:checked="true" />
+
+        <Button
+            android:id="@+id/btn_clear_memory"
+            style="@style/GhostButton"
+            android:text="@string/setting_clear_memory" />
+
         <!-- Gemini key (the easy way) -->
         <TextView
             android:layout_width="match_parent"

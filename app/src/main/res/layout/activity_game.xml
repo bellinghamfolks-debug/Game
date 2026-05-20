@@ -42,6 +42,16 @@
             android:layout_marginTop="4dp"
             android:textColor="@color/text_primary"
             android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/hud_mission"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textColor="@color/accent"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
     </LinearLayout>
 
     <!-- Accessibility action row, visible to TalkBack and to sighted users -->
@@ -101,6 +111,22 @@
             android:layout_weight="1"
             android:text="🧭"
             android:contentDescription="@string/a11y_navigate" />
+
+        <Button
+            android:id="@+id/a_hint"
+            style="@style/GhostButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="💡"
+            android:contentDescription="@string/a11y_hint" />
+
+        <Button
+            android:id="@+id/a_repeat"
+            style="@style/GhostButton"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:text="↻"
+            android:contentDescription="@string/a11y_repeat" />
 
         <Button
             android:id="@+id/a_pause"

@@ -32,6 +32,10 @@ public class SettingsActivity extends Activity {
         final SeekBar sb = findViewById(R.id.sb_tts);
         final CheckBox cbVib = findViewById(R.id.cb_vibration);
         final CheckBox cbSpa = findViewById(R.id.cb_spatial);
+        final CheckBox cbAi = findViewById(R.id.cb_ai_enabled);
+        final Spinner spAi = findViewById(R.id.sp_ai_mode);
+        final CheckBox cbAna = findViewById(R.id.cb_ai_analysis);
+        final Button clearMem = findViewById(R.id.btn_clear_memory);
         final EditText etKey = findViewById(R.id.et_gemini_key);
         final EditText etModel = findViewById(R.id.et_gemini_model);
         final EditText etProxy = findViewById(R.id.et_proxy);
@@ -58,6 +62,23 @@ public class SettingsActivity extends Activity {
         etKey.setText(prefs.geminiKey());
         etModel.setText(prefs.geminiModel());
         etProxy.setText(prefs.proxyUrl());
+
+        cbAi.setChecked(prefs.aiEnabled());
+        String[] modes = {
+                getString(R.string.setting_ai_mode_off),
+                getString(R.string.setting_ai_mode_basic),
+                getString(R.string.setting_ai_mode_advanced)
+        };
+        ArrayAdapter<String> aiAd = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_dropdown_item, modes);
+        spAi.setAdapter(aiAd);
+        spAi.setSelection(prefs.aiMode());
+        cbAna.setChecked(prefs.aiAnalysisAllowed());
+
+        clearMem.setOnClickListener(v -> {
+            prefs.clearAiMemory();
+            Toast.makeText(this, R.string.msg_memory_cleared, Toast.LENGTH_SHORT).show();
+        });
 
         getKeyBtn.setOnClickListener(v -> {
             try {
@@ -108,6 +129,9 @@ public class SettingsActivity extends Activity {
             prefs.setGeminiKey(etKey.getText().toString());
             prefs.setGeminiModel(etModel.getText().toString());
             prefs.setProxyUrl(etProxy.getText().toString().trim());
+            prefs.setAiEnabled(cbAi.isChecked());
+            prefs.setAiMode(spAi.getSelectedItemPosition());
+            prefs.setAiAnalysisAllowed(cbAna.isChecked());
             Toast.makeText(this, R.string.msg_saved, Toast.LENGTH_SHORT).show();
             finish();
         });
