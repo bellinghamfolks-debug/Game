@@ -46,6 +46,13 @@ public class HazardSystem {
     }
 
     public boolean isArmed() { return armed; }
+    public long windowMs() { return windowMs; }
+    public Kind currentKind() { return kind; }
+    public long timeRemainingMs() {
+        if (!armed) return 0;
+        long elapsed = System.currentTimeMillis() - warnedAtMs;
+        return Math.max(0, windowMs - elapsed);
+    }
 
     public void tick(GameState gs, boolean walking, Listener listener) {
         if (gs == null || gs.scene == null) return;

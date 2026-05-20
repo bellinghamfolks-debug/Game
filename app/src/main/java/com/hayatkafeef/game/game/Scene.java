@@ -6,7 +6,7 @@ import java.util.List;
 /** A bounded 2D world the player explores. */
 public class Scene {
 
-    public enum Id { HOME, STREET, UNIVERSITY, CAFE }
+    public enum Id { HOME, STREET, UNIVERSITY, CAFE, LIBRARY }
 
     public final Id id;
     /** Display name (Arabic). */

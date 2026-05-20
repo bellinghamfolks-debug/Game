@@ -50,6 +50,8 @@ public class DialogueSystem {
             case "pedestrian2": return pedestrianFemale(gs);
             case "waiter": return waiter(gs);
             case "oldfriend": return oldFriend(gs);
+            case "librarian": return librarian(gs);
+            case "library_student": return libraryStudent(gs);
         }
         // generic friendly NPC
         Convo c = new Convo(e.name, e.name + " يبتسم لك ويقول: السلام عليكم.");
@@ -152,6 +154,44 @@ public class DialogueSystem {
         c.choices.add(new Choice(
                 "حدّثه عن الدراسة", "استمع بانتباه وأبدى رأيًا مفيدًا.",
                 0, 2, 0, 1, null));
+        return c;
+    }
+
+    private static Convo librarian(GameState gs) {
+        Convo c = new Convo("أمين المكتبة",
+                "أهلًا بك. لديّ كتب صوتية ونسخ بطريقة برايل. ماذا تحتاج؟");
+        c.choices.add(new Choice(
+                "اطلب كتابًا صوتيًا في المنهج",
+                "أعدّ لك قائمة على هاتفك. الكتب جاهزة للاستماع مساء اليوم.",
+                0, 0, 3, 1, "got_audiobook"));
+        c.choices.add(new Choice(
+                "اسأل عن مكان هادئ للقراءة",
+                "هناك زاوية بعيدة عن الباب. اتجه يمينًا ثم أمامك.",
+                1, 1, 0, 1, null));
+        c.choices.add(new Choice(
+                "اطلب مساعدة في بحث",
+                "أعطاك مرشدًا للموضوع وملخصًا قصيرًا، ووعدك بالمتابعة.",
+                0, 2, 2, 1, "research_help"));
+        c.choices.add(new Choice(
+                "اشكره وانصرف",
+                "ابتسم بهدوء ووعدك بالعودة في أي وقت.", 0, 1, 0, 0, null));
+        return c;
+    }
+
+    private static Convo libraryStudent(GameState gs) {
+        Convo c = new Convo("طالب يقرأ",
+                "همس: عذرًا، هل يمكنك التحدث بصوت أخفض؟ أحاول التركيز.");
+        c.choices.add(new Choice(
+                "اعتذر بهدوء",
+                "ابتسم ورجع لكتابه دون أن يضيف شيئًا.",
+                0, 1, 0, 1, null));
+        c.choices.add(new Choice(
+                "اطلب منه توصية لكتاب",
+                "أوصى بكتاب عن المدن، وأخبرك بمكانه على الرفّ.",
+                0, 1, 1, 1, "knows_book"));
+        c.choices.add(new Choice(
+                "تجاهل وانصرف",
+                "بدا منزعجًا قليلًا، لكنه عاد للقراءة.", 0, -1, 0, 0, null));
         return c;
     }
 

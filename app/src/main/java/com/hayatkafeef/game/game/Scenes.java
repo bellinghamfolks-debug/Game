@@ -56,6 +56,38 @@ public class Scenes {
         return s;
     }
 
+    public static Scene library() {
+        Scene s = new Scene(Scene.Id.LIBRARY, "المكتبة", 18, 12, 0x1F1A14, 0x3D2614, 0xE0C36A, 1);
+        // bookshelves along both long walls
+        for (int x = 2; x <= 16; x += 3) {
+            s.add(new Entity(Entity.Kind.WALL, x, 1.5f, 0.6f, "رف كتب")
+                    .tag("رفّ مليء بالكتب").id("shelf_n_" + x));
+            s.add(new Entity(Entity.Kind.WALL, x, 10.5f, 0.6f, "رف كتب")
+                    .tag("رفّ مليء بالكتب").id("shelf_s_" + x));
+        }
+        // reading desks in the middle aisle
+        s.add(new Entity(Entity.Kind.DESK, 6, 6, 0.8f, "طاولة قراءة")
+                .tag("طاولة هادئة").id("read_table_1"));
+        s.add(new Entity(Entity.Kind.DESK, 12, 6, 0.8f, "طاولة قراءة")
+                .tag("طاولة هادئة").id("read_table_2"));
+        // librarian behind the front desk
+        s.add(new Entity(Entity.Kind.PERSON, 9, 3, 0.5f, "أمين المكتبة")
+                .tag("شخص هادئ، يساعدك على إيجاد ما تريد")
+                .id("librarian"));
+        // a silent student in the corner
+        s.add(new Entity(Entity.Kind.PERSON, 4, 8, 0.5f, "طالب يقرأ")
+                .tag("طالب صامت، يقلب الصفحات بهدوء").id("library_student"));
+        // ambient: a computer ticking softly
+        s.add(new Entity(Entity.Kind.SHOP, 16, 4, 0.5f, "حاسوب المكتبة")
+                .tag("صوت طباعة خفيف").id("library_pc").sound(1200, 1));
+        // exit back to the university
+        Entity exit = new Entity(Entity.Kind.DOOR, 1, 6, 0.8f, "باب المكتبة")
+                .tag("اخرج إلى الجامعة").id("door_back_uni");
+        s.add(exit);
+        s.exits.put("door_back_uni", Scene.Id.UNIVERSITY);
+        return s;
+    }
+
     public static Scene university() {
         Scene s = new Scene(Scene.Id.UNIVERSITY, "الجامعة", 22, 14, 0xA0BDD6, 0x70654A, 0x4F7A4A, 4);
         // pillars and walls
@@ -74,6 +106,11 @@ public class Scenes {
         s.add(hall);
         // elevator (sometimes broken — handled by EventSystem)
         s.add(new Entity(Entity.Kind.ELEVATOR, 4, 2.0f, 0.8f, "مصعد").id("elevator").sound(330, 1));
+        // library door at the far north
+        Entity libDoor = new Entity(Entity.Kind.DOOR, 20, 11, 0.9f, "باب المكتبة")
+                .tag("ادخل المكتبة الهادئة").id("door_library");
+        s.add(libDoor);
+        s.exits.put("door_library", Scene.Id.LIBRARY);
         // exit
         Entity exit = new Entity(Entity.Kind.DOOR, 1.0f, 12.0f, 0.9f, "البوابة الخارجية").tag("اخرج للشارع").id("door_back_street");
         s.add(exit);
@@ -102,6 +139,7 @@ public class Scenes {
             case STREET: return street();
             case UNIVERSITY: return university();
             case CAFE: return cafe();
+            case LIBRARY: return library();
         }
         return home();
     }

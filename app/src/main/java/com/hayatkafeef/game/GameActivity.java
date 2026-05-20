@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -15,24 +14,29 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.hayatkafeef.game.ai.AiDialogueManager;
-import com.hayatkafeef.game.ai.EnvDescriber;
 import com.hayatkafeef.game.audio.SpatialAudio;
 import com.hayatkafeef.game.audio.TtsManager;
+import com.hayatkafeef.game.game.AudioFeedbackManager;
 import com.hayatkafeef.game.game.DialogueSystem;
 import com.hayatkafeef.game.game.Entity;
 import com.hayatkafeef.game.game.GameEngine;
 import com.hayatkafeef.game.game.GameState;
+import com.hayatkafeef.game.game.HudController;
+import com.hayatkafeef.game.game.InputController;
 import com.hayatkafeef.game.game.Prefs;
+import com.hayatkafeef.game.game.SaveManager;
 import com.hayatkafeef.game.game.Scene;
-import com.hayatkafeef.game.game.Scenes;
 import com.hayatkafeef.game.haptics.HapticManager;
-import com.hayatkafeef.game.input.GestureController;
-import com.hayatkafeef.game.input.ShakeDetector;
 import com.hayatkafeef.game.missions.Mission;
 import com.hayatkafeef.game.render.GameView;
-import com.hayatkafeef.game.render.VisionMode;
 import com.hayatkafeef.game.world.EventLog;
 
+/**
+ * Activity is now the thin façade that wires the focused controllers
+ * (input, HUD, save, audio feedback) to the engine and the engine to
+ * the screen. All gameplay/state logic lives in the engine; all input
+ * logic lives in InputController; HUD strings live in HudController.
+ */
 public class GameActivity extends Activity implements GameEngine.View {
 
     public static final String EXTRA_NEW_GAME = "new_game";
@@ -41,15 +45,20 @@ public class GameActivity extends Activity implements GameEngine.View {
     private TtsManager tts;
     private SpatialAudio audio;
     private HapticManager haptics;
+    private AudioFeedbackManager feedback;
+    private SaveManager saveManager;
+    private HudController hud;
+    private InputController inputs;
+
     private GameEngine engine;
     private GameView gameView;
-    private GestureController gestures;
-    private ShakeDetector shake;
 
-    private TextView hudLocation, hudTime, hudStats, hudMission;
     private View overlay;
     private TextView overlayTitle, overlayBody;
     private LinearLayout overlayButtons;
+    private View hazardBanner;
+    private TextView hazardText, hazardSub;
+
     private boolean paused;
     private boolean inDialog;
 
@@ -67,29 +76,31 @@ public class GameActivity extends Activity implements GameEngine.View {
         audio.setEnabled(prefs.spatialAudio());
         haptics = new HapticManager(this);
         haptics.setEnabled(prefs.vibrationEnabled());
+        feedback = new AudioFeedbackManager(tts, audio, haptics);
+        saveManager = new SaveManager(prefs);
 
         gameView = findViewById(R.id.game_view);
-        hudLocation = findViewById(R.id.hud_location);
-        hudTime = findViewById(R.id.hud_time);
-        hudStats = findViewById(R.id.hud_stats);
-        hudMission = findViewById(R.id.hud_mission);
         overlay = findViewById(R.id.overlay);
         overlayTitle = findViewById(R.id.overlay_title);
         overlayBody = findViewById(R.id.overlay_body);
         overlayButtons = findViewById(R.id.overlay_buttons);
+        hazardBanner = findViewById(R.id.hazard_banner);
+        hazardText = findViewById(R.id.hazard_text);
+        hazardSub = findViewById(R.id.hazard_sub);
+
+        hud = new HudController(this, findViewById(android.R.id.content));
 
         engine = new GameEngine(this, gameView, tts, audio, haptics, this, prefs);
         gameView.setVisionMode(prefs.visionMode());
 
         boolean isNew = getIntent().getBooleanExtra(EXTRA_NEW_GAME, true);
         GameState gs;
-        if (!isNew && prefs.hasSave()) {
-            gs = GameState.fromBlob(prefs.saveBlob());
-            gs.scene = Scenes.create(gs.currentSceneId);
+        if (!isNew && saveManager.hasSave()) {
+            gs = saveManager.load();
         } else {
             gs = new GameState();
             gs.currentSceneId = Scene.Id.HOME;
-            gs.scene = Scenes.create(gs.currentSceneId);
+            gs.scene = com.hayatkafeef.game.game.Scenes.create(gs.currentSceneId);
             gs.player.x = 4;
             gs.player.y = 5;
             gs.player.heading = 0;
@@ -97,44 +108,21 @@ public class GameActivity extends Activity implements GameEngine.View {
         engine.setState(gs);
         engine.setVisionMode(prefs.visionMode());
 
-        gestures = new GestureController(this, new GestureController.Listener() {
-            @Override public void onWalk() { engine.cmdWalk(); }
-            @Override public void onStop() { engine.cmdStop(); }
-            @Override public void onTurnLeft() { engine.cmdTurnLeft(); }
-            @Override public void onTurnRight() { engine.cmdTurnRight(); }
-            @Override public void onInteract() { engine.cmdInteract(); }
-            @Override public void onDescribe() { engine.cmdDescribe(); }
+        inputs = new InputController(this, engine, gameView, new InputController.Host() {
+            @Override public void openNavMenu() { GameActivity.this.openNavMenu(); }
+            @Override public void onPauseToggle() { togglePause(); }
+            @Override public void onHint() { engine.cmdHint(); }
+            @Override public boolean inputEnabled() { return !inDialog && !paused; }
         });
-        gameView.setInputBridge(this::onGameTouch);
-
-        shake = new ShakeDetector(this, () -> engine.cmdShakeReorient());
-
-        // action bar
-        findViewById(R.id.a_left).setOnClickListener(v -> engine.cmdTurnLeft());
-        findViewById(R.id.a_right).setOnClickListener(v -> engine.cmdTurnRight());
-        findViewById(R.id.a_walk).setOnClickListener(v -> {
-            engine.cmdWalk();
-            main.postDelayed(engine::cmdStop, 900);
-        });
-        findViewById(R.id.a_describe).setOnClickListener(v -> engine.cmdDescribe());
-        findViewById(R.id.a_interact).setOnClickListener(v -> engine.cmdInteract());
-        findViewById(R.id.a_nav).setOnClickListener(v -> openNavMenu());
-        findViewById(R.id.a_hint).setOnClickListener(v -> engine.cmdHint());
-        findViewById(R.id.a_repeat).setOnClickListener(v -> engine.cmdRepeat());
-        findViewById(R.id.a_pause).setOnClickListener(v -> togglePause());
 
         // welcome
         main.postDelayed(() -> {
             tts.speak(getString(R.string.onb_1));
             main.postDelayed(() -> {
-                tts.speak(EnvDescriber.describeOnArrival(engine.state().scene));
-                // announce first mission
+                tts.speak(com.hayatkafeef.game.ai.EnvDescriber.describeOnArrival(engine.state().scene));
                 Mission first = engine.missions() != null ? engine.missions().current() : null;
                 if (first != null) {
-                    main.postDelayed(() -> {
-                        String t = "مهمة جديدة: " + first.title + ". " + first.description;
-                        tts.speak(t);
-                    }, 2200);
+                    main.postDelayed(() -> tts.speak("مهمة جديدة: " + first.title + ". " + first.description), 2200);
                 }
             }, 1800);
         }, 600);
@@ -142,22 +130,15 @@ public class GameActivity extends Activity implements GameEngine.View {
         engine.start();
     }
 
-    private boolean onGameTouch(MotionEvent ev) {
-        if (inDialog || paused) return false;
-        gestures.handle(ev);
-        return true;
-    }
-
     @Override protected void onResume() {
         super.onResume();
-        if (shake != null) shake.start();
-        // settings may have changed; refresh AI client + tts rate
+        if (inputs != null) inputs.resume();
         if (engine != null) engine.rebuildAi();
         if (tts != null) tts.setRate(prefs.ttsRate() / 100f);
     }
     @Override protected void onPause() {
-        if (shake != null) shake.stop();
-        save();
+        if (inputs != null) inputs.pause();
+        if (engine != null) saveManager.save(engine.state());
         super.onPause();
     }
     @Override protected void onDestroy() {
@@ -165,11 +146,6 @@ public class GameActivity extends Activity implements GameEngine.View {
         if (audio != null) audio.stopAll();
         if (tts != null) tts.shutdown();
         super.onDestroy();
-    }
-
-    private void save() {
-        if (engine == null || engine.state() == null) return;
-        prefs.writeSave(engine.state().toBlob());
     }
 
     private void openNavMenu() {
@@ -237,7 +213,7 @@ public class GameActivity extends Activity implements GameEngine.View {
                             this::showEventLog,
                             this::showDaySummary,
                             () -> startActivity(new Intent(this, ManualActivity.class)),
-                            () -> { save(); finish(); }
+                            () -> { saveManager.save(engine.state()); finish(); }
                     });
             tts.speakNow(getString(R.string.hud_paused));
         } else {
@@ -259,23 +235,17 @@ public class GameActivity extends Activity implements GameEngine.View {
     private void showDaySummary() {
         boolean lastDay = engine.state() != null && engine.state().day >= 7
                 && engine.missions() != null && engine.missions().allCompleted();
+        boolean dayOver = engine.missions() != null && engine.missions().allCompleted();
         String[] btns;
         Runnable[] acts;
-        boolean dayOver = engine.missions() != null && engine.missions().allCompleted();
         if (dayOver && !lastDay) {
-            btns = new String[]{
-                    getString(R.string.btn_next_day),
-                    getString(R.string.btn_close)
-            };
+            btns = new String[]{ getString(R.string.btn_next_day), getString(R.string.btn_close) };
             acts = new Runnable[]{
                     () -> { hideOverlay(); paused = false; engine.advanceToNextDay(); engine.start(); },
                     () -> { hideOverlay(); paused = false; engine.start(); }
             };
         } else if (lastDay) {
-            btns = new String[]{
-                    getString(R.string.btn_free_play),
-                    getString(R.string.btn_close)
-            };
+            btns = new String[]{ getString(R.string.btn_free_play), getString(R.string.btn_close) };
             acts = new Runnable[]{
                     () -> { hideOverlay(); paused = false; engine.start(); },
                     () -> { hideOverlay(); paused = false; engine.start(); }
@@ -291,32 +261,11 @@ public class GameActivity extends Activity implements GameEngine.View {
 
     // ----- GameEngine.View -----
 
-    @Override
-    public void onState(GameState gs) {
-        if (gs == null) return;
-        hudLocation.setText(getString(R.string.hud_location, gs.scene != null ? gs.scene.name : "—"));
-        hudTime.setText(getString(R.string.hud_time, gs.formatTime() + " · يوم " + gs.day));
-        hudStats.setText(
-                getString(R.string.hud_stat_mobility) + " " + gs.player.mobility + "  ·  " +
-                getString(R.string.hud_stat_social) + " " + gs.player.social + "  ·  " +
-                getString(R.string.hud_stat_tech) + " " + gs.player.tech + "  ·  " +
-                getString(R.string.hud_stat_confidence) + " " + gs.player.confidence
-        );
-        Mission cur = engine.missions() != null ? engine.missions().current() : null;
-        if (cur != null) {
-            int p = engine.missions().progress() + 1;
-            int t = engine.missions().total();
-            hudMission.setText("◉ " + p + "/" + t + " — " + cur.title);
-            hudMission.setVisibility(View.VISIBLE);
-        } else {
-            hudMission.setText("✓ اكتملت مهام اليوم");
-            hudMission.setVisibility(View.VISIBLE);
-        }
+    @Override public void onState(GameState gs) {
+        hud.update(gs, engine.missions());
     }
 
-    @Override
-    public void onMessage(String msg) {
-        // Toast acts as a TalkBack live region; main delivery is TTS.
+    @Override public void onMessage(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
     }
 
@@ -356,19 +305,39 @@ public class GameActivity extends Activity implements GameEngine.View {
         tts.speak(convo.npc + ". " + convo.opener);
     }
 
-    @Override
-    public void onSceneTransition(Scene to) {
+    @Override public void onSceneTransition(Scene to) {
         if (to != null) Toast.makeText(this, to.name, Toast.LENGTH_SHORT).show();
     }
 
+    @Override public void onMissionChanged(Mission previous, Mission next) {}
+
     @Override
-    public void onMissionChanged(Mission previous, Mission next) {
-        // hud refreshes on next onState; nothing to do here.
+    public void onHazardWarning(String text, String shortLabel, long reactionWindowMs) {
+        if (hazardBanner == null) return;
+        hazardBanner.setVisibility(View.VISIBLE);
+        hazardText.setText("توقف! " + shortLabel);
+        hazardSub.setText(text);
+        hazardBanner.setAlpha(0f);
+        hazardBanner.animate().alpha(1f).setDuration(120).start();
+        main.postDelayed(this::hideHazardBanner, reactionWindowMs + 800);
+    }
+
+    @Override
+    public void onHazardResolved(String text, boolean impact) {
+        if (hazardBanner == null) return;
+        hazardSub.setText(text);
+        hazardText.setText(impact ? "ارتطام" : "نجوت!");
+        main.postDelayed(this::hideHazardBanner, 900);
+    }
+
+    private void hideHazardBanner() {
+        if (hazardBanner == null) return;
+        hazardBanner.animate().alpha(0f).setDuration(250)
+                .withEndAction(() -> hazardBanner.setVisibility(View.GONE)).start();
     }
 
     @Override
     public void onDayCompleted(int day) {
-        // Trigger the day summary overlay automatically.
         main.postDelayed(() -> {
             if (!isFinishing()) {
                 paused = true;

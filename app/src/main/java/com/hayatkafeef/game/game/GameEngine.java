@@ -38,6 +38,10 @@ public class GameEngine implements EventSystem.Effects {
         void onSceneTransition(Scene to);
         void onMissionChanged(Mission previous, Mission next);
         void onDayCompleted(int day);
+        /** A new hazard is armed; the player has reactionWindowMs to stop. */
+        void onHazardWarning(String text, String shortLabel, long reactionWindowMs);
+        /** The hazard has resolved (impact==true means the player was hit). */
+        void onHazardResolved(String text, boolean impact);
     }
 
     // dependencies
@@ -251,12 +255,15 @@ public class GameEngine implements EventSystem.Effects {
                 tts.speakNow(text);
                 haptics.danger();
                 addLog(text);
+                String shortLabel = kindShortLabel(kind);
+                bridge.onHazardWarning(text, shortLabel, hazards.windowMs());
             }
             @Override public void onResolve(String text, boolean impact, HazardSystem.Kind kind) {
                 tts.speakNow(text);
                 if (impact) { haptics.error(); profile.onHazardImpact(); }
                 else { haptics.confirm(); profile.onHazardSurvived(); }
                 addLog(text);
+                bridge.onHazardResolved(text, impact);
             }
         });
 
@@ -316,6 +323,15 @@ public class GameEngine implements EventSystem.Effects {
         Entity e = state.scene.nearest(state.player.x, state.player.y, 1.2f);
         if (e == null) return "هناك شيء أمامك. توقف.";
         return e.name + " أمامك. توقف.";
+    }
+
+    private String kindShortLabel(HazardSystem.Kind k) {
+        switch (k) {
+            case BICYCLE: return "دراجة";
+            case CAR: return "سيارة";
+            case OPEN_HOLE: return "عائق";
+        }
+        return "خطر";
     }
 
     private void hapticForKind(Entity.Kind k) {

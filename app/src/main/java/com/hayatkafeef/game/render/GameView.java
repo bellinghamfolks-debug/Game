@@ -178,6 +178,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
             case STREET: top = 0xFFB7D7EF; bottom = 0xFFEFD9B7; break;        // sky to warm horizon
             case UNIVERSITY: top = 0xFFC8D8E8; bottom = 0xFFE2D7C4; break;
             case CAFE: top = 0xFF2A1F1A; bottom = 0xFF1A1410; break;           // warm dark interior
+            case LIBRARY: top = 0xFF2A2418; bottom = 0xFF1C160E; break;        // amber lamplight
             case HOME: default: top = 0xFF22262C; bottom = 0xFF0F1115; break;
         }
         paint.setShader(new LinearGradient(0, 0, 0, h, top, bottom, Shader.TileMode.CLAMP));
@@ -256,6 +257,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
             case STREET:     baseTop = 0xFF6E8F4C; baseBot = 0xFF3F5A28; break;  // sidewalk grass tint
             case UNIVERSITY: baseTop = 0xFFC7BFA8; baseBot = 0xFF8C846E; break;  // marble
             case CAFE:       baseTop = 0xFF5C3A1A; baseBot = 0xFF301B0A; break;  // wood
+            case LIBRARY:    baseTop = 0xFF4A3622; baseBot = 0xFF261A0E; break;  // dark wood + rug
             case HOME: default: baseTop = 0xFF7A5E40; baseBot = 0xFF3D2B16; break;
         }
         p.setShader(new LinearGradient(0, 0, 0, size, baseTop, baseBot, Shader.TileMode.CLAMP));

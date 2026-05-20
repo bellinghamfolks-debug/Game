@@ -138,6 +138,43 @@
 
     </LinearLayout>
 
+    <!-- Hazard warning banner: appears for ~1.6 s when a hazard arms -->
+    <LinearLayout
+        android:id="@+id/hazard_banner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:padding="20dp"
+        android:background="#CC8E1F1F"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/hazard_icon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="⚠"
+            android:textColor="@color/white"
+            android:textSize="64sp" />
+
+        <TextView
+            android:id="@+id/hazard_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="توقف!"
+            android:textColor="@color/white"
+            android:textSize="28sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/hazard_sub"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/white"
+            android:textSize="16sp" />
+    </LinearLayout>
+
     <!-- Overlay for pause / dialog text -->
     <LinearLayout
         android:id="@+id/overlay"

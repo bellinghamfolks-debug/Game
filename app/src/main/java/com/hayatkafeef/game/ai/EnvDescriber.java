@@ -69,6 +69,7 @@ public class EnvDescriber {
             case STREET: return "خرجتَ إلى الشارع. الجامعة على اليمين، والمقهى أمامك.";
             case UNIVERSITY: return "أنت داخل الجامعة. القاعة بجوار المصعد.";
             case CAFE: return "دخلتَ المقهى. رائحة قهوة طازجة.";
+            case LIBRARY: return "دخلتَ المكتبة. صمت دافئ، ورائحة ورق قديم. أمين المكتبة أمامك.";
         }
         return "";
     }
