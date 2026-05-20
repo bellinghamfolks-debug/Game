@@ -31,9 +31,19 @@ public class HazardSystem {
     private boolean armed;
     private long warnedAtMs;
     private Kind kind;
-    private static final long WINDOW_MS = 1600;
-    private static final long COOLDOWN_MS = 14000;
+    private long windowMs = 1600;
+    private long cooldownMs = 14000;
+    private float frequencyMultiplier = 1.0f;
     private long lastHazardEndMs;
+
+    /** 0 = easy (calm), 1 = normal, 2 = hard (life simulation). */
+    public void setDifficulty(int level) {
+        switch (level) {
+            case 0: windowMs = 2500; cooldownMs = 20000; frequencyMultiplier = 0.5f; break;
+            case 2: windowMs = 1200; cooldownMs = 9000;  frequencyMultiplier = 1.7f; break;
+            case 1: default: windowMs = 1600; cooldownMs = 14000; frequencyMultiplier = 1.0f; break;
+        }
+    }
 
     public boolean isArmed() { return armed; }
 
@@ -42,7 +52,7 @@ public class HazardSystem {
         long now = System.currentTimeMillis();
 
         if (armed) {
-            if (now - warnedAtMs >= WINDOW_MS) {
+            if (now - warnedAtMs >= windowMs) {
                 // resolve
                 boolean impact = walking;
                 if (impact) applyImpact(gs, kind);
@@ -57,11 +67,9 @@ public class HazardSystem {
             return;
         }
 
-        if (now - lastHazardEndMs < COOLDOWN_MS) return;
-        // probability per second depends on scene & difficulty
-        float chance = chanceForScene(gs.currentSceneId);
+        if (now - lastHazardEndMs < cooldownMs) return;
+        float chance = chanceForScene(gs.currentSceneId) * frequencyMultiplier;
         if (chance <= 0) return;
-        // tick is called ~20Hz, so divide
         if (rng.nextFloat() > chance / 20f) return;
 
         // arm a new hazard

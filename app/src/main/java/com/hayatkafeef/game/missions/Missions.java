@@ -28,6 +28,9 @@ public final class Missions {
         @Override public boolean check(GameState gs) {
             return gs.flags.contains("i:" + entityId);
         }
+        @Override public void onStart(GameState gs) {
+            gs.flags.remove("i:" + entityId);
+        }
         @Override public void onComplete(GameState gs) {
             gs.player.mobility += rewardMobility;
             gs.player.social += rewardSocial;

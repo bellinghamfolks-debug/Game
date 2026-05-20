@@ -112,6 +112,20 @@
     <string name="msg_log_empty">Nothing has happened yet. Move or talk to someone.</string>
     <string name="msg_summary_loading">Preparing today\'s summary…</string>
 
+    <string name="btn_next_day">Sleep and start next day</string>
+    <string name="btn_free_play">Free play</string>
+
+    <string name="setting_difficulty">Difficulty</string>
+    <string name="diff_easy">Easy</string>
+    <string name="diff_normal">Normal</string>
+    <string name="diff_hard">Hard (realistic simulation)</string>
+
+    <string name="setting_commentary">Voice commentary level</string>
+    <string name="com_verbose">Verbose (beginners)</string>
+    <string name="com_normal">Normal</string>
+    <string name="com_brief">Brief (experts)</string>
+    <string name="com_audio_only">Audio + haptics only</string>
+
     <string name="nav_title">Where do you want to go?</string>
     <string name="nav_hint">I will guide you step by step. Pick a destination, or cancel.</string>
     <string name="nav_cancel">Cancel guidance</string>

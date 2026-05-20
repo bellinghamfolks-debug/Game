@@ -49,6 +49,36 @@
             android:progress="100" />
 
         <!-- Vibration -->
+        <!-- Difficulty -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="@string/setting_difficulty"
+            style="@style/CardTitle" />
+
+        <Spinner
+            android:id="@+id/sp_difficulty"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/card_bg" />
+
+        <!-- Commentary level -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="@string/setting_commentary"
+            style="@style/CardTitle" />
+
+        <Spinner
+            android:id="@+id/sp_commentary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/card_bg" />
+
         <CheckBox
             android:id="@+id/cb_vibration"
             android:layout_width="match_parent"

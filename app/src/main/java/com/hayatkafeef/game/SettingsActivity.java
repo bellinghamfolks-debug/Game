@@ -30,6 +30,8 @@ public class SettingsActivity extends Activity {
 
         final Spinner sp = findViewById(R.id.sp_vision);
         final SeekBar sb = findViewById(R.id.sb_tts);
+        final Spinner spDiff = findViewById(R.id.sp_difficulty);
+        final Spinner spCom = findViewById(R.id.sp_commentary);
         final CheckBox cbVib = findViewById(R.id.cb_vibration);
         final CheckBox cbSpa = findViewById(R.id.cb_spatial);
         final CheckBox cbAi = findViewById(R.id.cb_ai_enabled);
@@ -74,6 +76,27 @@ public class SettingsActivity extends Activity {
         spAi.setAdapter(aiAd);
         spAi.setSelection(prefs.aiMode());
         cbAna.setChecked(prefs.aiAnalysisAllowed());
+
+        String[] diffs = {
+                getString(R.string.diff_easy),
+                getString(R.string.diff_normal),
+                getString(R.string.diff_hard)
+        };
+        ArrayAdapter<String> diffAd = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_dropdown_item, diffs);
+        spDiff.setAdapter(diffAd);
+        spDiff.setSelection(prefs.difficulty());
+
+        String[] coms = {
+                getString(R.string.com_verbose),
+                getString(R.string.com_normal),
+                getString(R.string.com_brief),
+                getString(R.string.com_audio_only)
+        };
+        ArrayAdapter<String> comAd = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_dropdown_item, coms);
+        spCom.setAdapter(comAd);
+        spCom.setSelection(prefs.commentaryLevel());
 
         clearMem.setOnClickListener(v -> {
             prefs.clearAiMemory();
@@ -132,6 +155,8 @@ public class SettingsActivity extends Activity {
             prefs.setAiEnabled(cbAi.isChecked());
             prefs.setAiMode(spAi.getSelectedItemPosition());
             prefs.setAiAnalysisAllowed(cbAna.isChecked());
+            prefs.setDifficulty(spDiff.getSelectedItemPosition());
+            prefs.setCommentaryLevel(spCom.getSelectedItemPosition());
             Toast.makeText(this, R.string.msg_saved, Toast.LENGTH_SHORT).show();
             finish();
         });

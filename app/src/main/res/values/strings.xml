@@ -121,6 +121,20 @@
     <string name="msg_log_empty">لم يحدث شيء بعد. تحرك أو تحدّث مع أحد.</string>
     <string name="msg_summary_loading">أحضّر ملخص اليوم…</string>
 
+    <string name="btn_next_day">انم وابدأ اليوم القادم</string>
+    <string name="btn_free_play">لعب حر</string>
+
+    <string name="setting_difficulty">مستوى الصعوبة</string>
+    <string name="diff_easy">سهل</string>
+    <string name="diff_normal">عادي</string>
+    <string name="diff_hard">صعب (محاكاة واقعية)</string>
+
+    <string name="setting_commentary">مستوى التعليق الصوتي</string>
+    <string name="com_verbose">تفصيلي (للمبتدئين)</string>
+    <string name="com_normal">عادي</string>
+    <string name="com_brief">مختصر (للمحترفين)</string>
+    <string name="com_audio_only">صوت ومؤثرات فقط</string>
+
     <string name="nav_title">إلى أين تريد الذهاب؟</string>
     <string name="nav_hint">سأرشدك خطوة بخطوة. اختر وجهة من القائمة، أو اضغط إلغاء.</string>
     <string name="nav_cancel">إلغاء الإرشاد</string>

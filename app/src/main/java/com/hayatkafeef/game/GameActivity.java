@@ -257,13 +257,36 @@ public class GameActivity extends Activity implements GameEngine.View {
     }
 
     private void showDaySummary() {
-        showOverlay(getString(R.string.menu_day_summary), getString(R.string.msg_summary_loading),
-                new String[]{ getString(R.string.btn_close) },
-                new Runnable[]{ () -> { hideOverlay(); paused = false; engine.start(); } });
+        boolean lastDay = engine.state() != null && engine.state().day >= 7
+                && engine.missions() != null && engine.missions().allCompleted();
+        String[] btns;
+        Runnable[] acts;
+        boolean dayOver = engine.missions() != null && engine.missions().allCompleted();
+        if (dayOver && !lastDay) {
+            btns = new String[]{
+                    getString(R.string.btn_next_day),
+                    getString(R.string.btn_close)
+            };
+            acts = new Runnable[]{
+                    () -> { hideOverlay(); paused = false; engine.advanceToNextDay(); engine.start(); },
+                    () -> { hideOverlay(); paused = false; engine.start(); }
+            };
+        } else if (lastDay) {
+            btns = new String[]{
+                    getString(R.string.btn_free_play),
+                    getString(R.string.btn_close)
+            };
+            acts = new Runnable[]{
+                    () -> { hideOverlay(); paused = false; engine.start(); },
+                    () -> { hideOverlay(); paused = false; engine.start(); }
+            };
+        } else {
+            btns = new String[]{ getString(R.string.btn_close) };
+            acts = new Runnable[]{ () -> { hideOverlay(); paused = false; engine.start(); } };
+        }
+        showOverlay(getString(R.string.menu_day_summary), getString(R.string.msg_summary_loading), btns, acts);
         tts.speakNow(getString(R.string.msg_summary_loading));
-        engine.cmdDaySummary((text, fromAi) -> {
-            overlayBody.setText(text);
-        });
+        engine.cmdDaySummary((text, fromAi) -> overlayBody.setText(text));
     }
 
     // ----- GameEngine.View -----

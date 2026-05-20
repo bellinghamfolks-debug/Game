@@ -45,11 +45,18 @@ public class MissionManager {
             cur.onComplete(gs);
             idx++;
             Mission next = current();
+            if (next != null) next.onStart(gs);
             if (listener != null) {
                 listener.onMissionCompleted(cur, next);
                 if (next == null) listener.onAllMissionsCompleted();
             }
         }
+    }
+
+    /** Call once after construction to fire onStart on the first mission. */
+    public void prime(GameState gs) {
+        Mission cur = current();
+        if (cur != null) cur.onStart(gs);
     }
 
     public void load(String blob) {

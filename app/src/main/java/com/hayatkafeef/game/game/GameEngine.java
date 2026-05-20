@@ -6,13 +6,13 @@ import android.os.Looper;
 
 import com.hayatkafeef.game.ai.AiClient;
 import com.hayatkafeef.game.ai.AiDialogueManager;
-import com.hayatkafeef.game.ai.AiFallbackProvider;
 import com.hayatkafeef.game.ai.AiHintManager;
 import com.hayatkafeef.game.ai.AiSafetyFilter;
 import com.hayatkafeef.game.ai.AiSummaryManager;
 import com.hayatkafeef.game.ai.CharacterMemory;
 import com.hayatkafeef.game.ai.EnvDescriber;
 import com.hayatkafeef.game.ai.NavGuide;
+import com.hayatkafeef.game.ai.OfflineContentProvider;
 import com.hayatkafeef.game.audio.SpatialAudio;
 import com.hayatkafeef.game.audio.TtsManager;
 import com.hayatkafeef.game.haptics.HapticManager;
@@ -23,6 +23,7 @@ import com.hayatkafeef.game.render.GameView;
 import com.hayatkafeef.game.render.VisionMode;
 import com.hayatkafeef.game.world.EventLog;
 import com.hayatkafeef.game.world.HazardSystem;
+import com.hayatkafeef.game.world.PlayerProfile;
 
 /**
  * Central game controller — owns the world state, render bridge, input
@@ -53,6 +54,7 @@ public class GameEngine implements EventSystem.Effects {
     private final NavGuide nav = new NavGuide();
     private final EventLog log = new EventLog();
     private final HazardSystem hazards = new HazardSystem();
+    private final PlayerProfile profile = new PlayerProfile();
 
     // AI layer
     private final AiSafetyFilter aiSafety = new AiSafetyFilter();
@@ -95,7 +97,12 @@ public class GameEngine implements EventSystem.Effects {
         this.characterMemory = CharacterMemory.fromJson(prefs.aiMemory());
         // dialogue manager depends on memory
         this.dialogueMgr = new AiDialogueManager(aiClient, aiSafety, characterMemory);
+        // difficulty -> hazards
+        this.hazards.setDifficulty(prefs.difficulty());
     }
+
+    public PlayerProfile profile() { return profile; }
+    public HazardSystem hazards() { return hazards; }
 
     /** Recreate AI managers when settings change. */
     public void rebuildAi() {
@@ -126,10 +133,47 @@ public class GameEngine implements EventSystem.Effects {
             }
             @Override public void onAllMissionsCompleted() {
                 bridge.onDayCompleted(state.day);
-                addLog(AiFallbackProvider.narrateDayComplete(state.day));
-                tts.speakNow(AiFallbackProvider.narrateDayComplete(state.day));
+                String msg = OfflineContentProvider.dayComplete(state.day);
+                addLog(msg);
+                tts.speakNow(msg);
             }
         });
+        this.missions.prime(state);
+    }
+
+    /** Wake up the next morning: advance day, reset to home, fresh missions. */
+    public void advanceToNextDay() {
+        if (state == null) return;
+        int next = Math.min(7, state.day + 1);
+        state.day = next;
+        state.minutes = 0;
+        // keep persistent skill stats, drop transient interaction flags
+        state.flags.clear();
+        Scene home = Scenes.create(Scene.Id.HOME);
+        state.enterScene(home, 4, 5);
+        state.player.heading = 0;
+        gameView.setState(state);
+        this.missions = DayScript.forDay(state.day);
+        this.missions.setListener(new MissionManager.Listener() {
+            @Override public void onMissionCompleted(Mission previous, Mission next2) {
+                onMissionDone(previous, next2);
+            }
+            @Override public void onAllMissionsCompleted() {
+                bridge.onDayCompleted(state.day);
+                String msg = OfflineContentProvider.dayComplete(state.day);
+                addLog(msg);
+                tts.speakNow(msg);
+            }
+        });
+        this.missions.prime(state);
+        hazards.reset();
+        String intro = OfflineContentProvider.dayIntro(state.day);
+        tts.speakNow(intro);
+        addLog(intro);
+        Mission first = this.missions.current();
+        if (first != null) {
+            tts.speak("مهمة جديدة: " + first.title + ". " + first.description);
+        }
     }
 
     public void setVisionMode(VisionMode m) {
@@ -164,6 +208,7 @@ public class GameEngine implements EventSystem.Effects {
             } else {
                 walking = false;
                 haptics.warn();
+                profile.onCollision();
                 String msg = blockedMessage();
                 tts.speakNow(msg);
                 addLog(msg);
@@ -206,17 +251,21 @@ public class GameEngine implements EventSystem.Effects {
             }
             @Override public void onResolve(String text, boolean impact, HazardSystem.Kind kind) {
                 tts.speakNow(text);
-                if (impact) haptics.error(); else haptics.confirm();
+                if (impact) { haptics.error(); profile.onHazardImpact(); }
+                else { haptics.confirm(); profile.onHazardSurvived(); }
                 addLog(text);
             }
         });
 
-        // passive flavor events (less frequent now that hazards exist)
-        String ev = events.maybeFire(state, this);
-        if (ev != null) {
-            tts.speak(ev);
-            bridge.onMessage(ev);
-            addLog(ev);
+        // passive flavor events (suppressed at brief / audio-only verbosity)
+        int verbosity = effectiveCommentaryLevel();
+        if (verbosity <= 1) {
+            String ev = events.maybeFire(state, this);
+            if (ev != null) {
+                tts.speak(ev);
+                bridge.onMessage(ev);
+                addLog(ev);
+            }
         }
 
         // live navigation
@@ -235,12 +284,13 @@ public class GameEngine implements EventSystem.Effects {
     }
 
     private void onMissionDone(Mission previous, Mission next) {
-        String done = AiFallbackProvider.narrateMissionDone(previous);
+        profile.onMissionDone();
+        String done = OfflineContentProvider.missionDone(previous);
         tts.speakNow(done);
         addLog(done);
         bridge.onMissionChanged(previous, next);
         if (next != null) {
-            String start = AiFallbackProvider.narrateMissionStart(next);
+            String start = OfflineContentProvider.missionStart(next);
             tts.speak(start);
             addLog("مهمة جديدة: " + next.title);
         }
@@ -348,11 +398,11 @@ public class GameEngine implements EventSystem.Effects {
 
     /** Ask the hint manager (async if AI is on). */
     public void cmdHint() {
+        profile.onHint();
         Mission cur = missions == null ? null : missions.current();
         boolean aiOn = prefs.aiEnabled() && prefs.aiMode() >= 1;
         hintMgr.ask(state, cur, aiOn, prefs.aiMode(), (text, fromAi) -> {
-            String prefix = fromAi ? "" : "";
-            tts.speakNow(prefix + text);
+            tts.speakNow(text);
             addLog("تلميح: " + text);
             bridge.onMessage(text);
         });
@@ -419,11 +469,27 @@ public class GameEngine implements EventSystem.Effects {
         gameView.setState(state);
         bridge.onSceneTransition(to);
         String msg = EnvDescriber.describeOnArrival(to);
+        // Use shorter messages when commentary level is set to brief.
+        int level = effectiveCommentaryLevel();
+        if (level >= 2) msg = to.name + ".";
         tts.speakNow(msg);
         addLog(msg);
         haptics.confirm();
         state.tickMinutes(5);
         hazards.reset();
+    }
+
+    /** Returns the effective verbosity: explicit setting, or adaptive recommendation. */
+    private int effectiveCommentaryLevel() {
+        int level = prefs.commentaryLevel();
+        // If user picked "adaptive" via mode 3 (audio-only) we keep brief.
+        // Otherwise treat level 0..2 explicitly. Adaptive is implicit when AI
+        // analysis is allowed: it shifts the floor based on struggle score.
+        if (prefs.aiAnalysisAllowed() && profile != null) {
+            int adaptive = profile.suggestedCommentaryLevel();
+            if (level > adaptive) level = adaptive;
+        }
+        return level;
     }
 
     /** Apply dialogue choice effects and update relationship memory. */

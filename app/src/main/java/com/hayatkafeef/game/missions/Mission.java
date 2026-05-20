@@ -28,6 +28,13 @@ public abstract class Mission {
     /** Predicate evaluated each frame. */
     public abstract boolean check(GameState gs);
 
+    /**
+     * Called when this mission becomes the active one. Subclasses can
+     * reset stale state (e.g. a Mission.Interact clears its 'i:<id>'
+     * flag so the player has to interact again *during* the mission).
+     */
+    public void onStart(GameState gs) {}
+
     /** Optional reward / side-effect hook. */
     public void onComplete(GameState gs) {}
 }
