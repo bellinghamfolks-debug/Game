@@ -138,6 +138,8 @@ public class GameEngine implements EventSystem.Effects {
                 tts.speakNow(msg);
             }
         });
+        // Restore saved progress within the day.
+        this.missions.load(String.valueOf(s.missionIdx));
         this.missions.prime(state);
     }
 
@@ -147,6 +149,7 @@ public class GameEngine implements EventSystem.Effects {
         int next = Math.min(7, state.day + 1);
         state.day = next;
         state.minutes = 0;
+        state.missionIdx = 0;
         // keep persistent skill stats, drop transient interaction flags
         state.flags.clear();
         Scene home = Scenes.create(Scene.Id.HOME);
@@ -285,6 +288,8 @@ public class GameEngine implements EventSystem.Effects {
 
     private void onMissionDone(Mission previous, Mission next) {
         profile.onMissionDone();
+        // Persist progress in the state blob field for save/load.
+        if (missions != null) state.missionIdx = missions.progress();
         String done = OfflineContentProvider.missionDone(previous);
         tts.speakNow(done);
         addLog(done);
@@ -336,22 +341,22 @@ public class GameEngine implements EventSystem.Effects {
 
     public void cmdWalk() {
         walking = true;
-        tts.speakNow("مشي");
+        if (effectiveCommentaryLevel() <= 1) tts.speakNow("مشي");
         haptics.confirm();
     }
     public void cmdStop() {
         walking = false;
-        tts.speakNow("توقف");
+        if (effectiveCommentaryLevel() <= 1) tts.speakNow("توقف");
         haptics.confirm();
     }
     public void cmdTurnRight() {
         state.player.heading += (float) (Math.PI / 8.0);
-        tts.speakNow("يمين");
+        if (effectiveCommentaryLevel() <= 1) tts.speakNow("يمين");
         haptics.confirm();
     }
     public void cmdTurnLeft() {
         state.player.heading -= (float) (Math.PI / 8.0);
-        tts.speakNow("يسار");
+        if (effectiveCommentaryLevel() <= 1) tts.speakNow("يسار");
         haptics.confirm();
     }
     public void cmdInteract() {
@@ -423,7 +428,9 @@ public class GameEngine implements EventSystem.Effects {
             tts.speakNow("اكتملت جميع مهام اليوم.");
             return;
         }
-        String txt = "المهمة الحالية: " + cur.title + ". " + cur.description;
+        int p = missions.progress() + 1;
+        int t = missions.total();
+        String txt = "المهمة " + p + " من " + t + ": " + cur.title + ". " + cur.description;
         tts.speakNow(txt);
         bridge.onMessage(txt);
     }

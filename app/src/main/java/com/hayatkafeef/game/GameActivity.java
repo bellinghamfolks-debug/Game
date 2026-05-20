@@ -304,10 +304,13 @@ public class GameActivity extends Activity implements GameEngine.View {
         );
         Mission cur = engine.missions() != null ? engine.missions().current() : null;
         if (cur != null) {
-            hudMission.setText("◉ " + cur.title);
+            int p = engine.missions().progress() + 1;
+            int t = engine.missions().total();
+            hudMission.setText("◉ " + p + "/" + t + " — " + cur.title);
             hudMission.setVisibility(View.VISIBLE);
         } else {
             hudMission.setText("✓ اكتملت مهام اليوم");
+            hudMission.setVisibility(View.VISIBLE);
         }
     }
 

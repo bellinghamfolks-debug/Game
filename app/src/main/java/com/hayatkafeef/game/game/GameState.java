@@ -10,6 +10,8 @@ public class GameState {
     public int minutes = 0;
     /** Day count. */
     public int day = 1;
+    /** Mission index within the day. Engine syncs this into save. */
+    public int missionIdx = 0;
     /** Boolean flags / story bits. */
     public final java.util.HashSet<String> flags = new java.util.HashSet<>();
 
@@ -41,6 +43,7 @@ public class GameState {
         sb.append("S:").append(currentSceneId.name()).append('\n');
         sb.append("M:").append(minutes).append('\n');
         sb.append("D:").append(day).append('\n');
+        sb.append("X:").append(missionIdx).append('\n');
         sb.append("P:").append(player.toJson()).append('\n');
         if (!flags.isEmpty()) {
             sb.append("F:");
@@ -66,6 +69,8 @@ public class GameState {
                 try { gs.minutes = Integer.parseInt(line.substring(2)); } catch (Exception ignored) {}
             } else if (line.startsWith("D:")) {
                 try { gs.day = Integer.parseInt(line.substring(2)); } catch (Exception ignored) {}
+            } else if (line.startsWith("X:")) {
+                try { gs.missionIdx = Integer.parseInt(line.substring(2)); } catch (Exception ignored) {}
             } else if (line.startsWith("P:")) {
                 gs.player = Player.fromJson(line.substring(2));
             } else if (line.startsWith("F:")) {
