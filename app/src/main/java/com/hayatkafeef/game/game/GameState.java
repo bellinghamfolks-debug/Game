@@ -6,6 +6,8 @@ public class GameState {
     public Player player = new Player();
     public Scene scene;
     public Scene.Id currentSceneId = Scene.Id.HOME;
+    /** The scene we came from, so 'go back' has somewhere to aim. */
+    public Scene.Id previousSceneId = null;
     /** Game-clock minutes since 06:00. */
     public int minutes = 0;
     /** Day count. */
@@ -16,6 +18,7 @@ public class GameState {
     public final java.util.HashSet<String> flags = new java.util.HashSet<>();
 
     public void enterScene(Scene s, float spawnX, float spawnY) {
+        if (this.currentSceneId != s.id) this.previousSceneId = this.currentSceneId;
         this.scene = s;
         this.currentSceneId = s.id;
         player.x = spawnX;
@@ -41,6 +44,7 @@ public class GameState {
     public String toBlob() {
         StringBuilder sb = new StringBuilder();
         sb.append("S:").append(currentSceneId.name()).append('\n');
+        if (previousSceneId != null) sb.append("PS:").append(previousSceneId.name()).append('\n');
         sb.append("M:").append(minutes).append('\n');
         sb.append("D:").append(day).append('\n');
         sb.append("X:").append(missionIdx).append('\n');
@@ -62,7 +66,10 @@ public class GameState {
         GameState gs = new GameState();
         if (blob == null) return gs;
         for (String line : blob.split("\n")) {
-            if (line.startsWith("S:")) {
+            if (line.startsWith("PS:")) {
+                try { gs.previousSceneId = Scene.Id.valueOf(line.substring(3)); }
+                catch (Exception ignored) {}
+            } else if (line.startsWith("S:")) {
                 try { gs.currentSceneId = Scene.Id.valueOf(line.substring(2)); }
                 catch (Exception ignored) {}
             } else if (line.startsWith("M:")) {

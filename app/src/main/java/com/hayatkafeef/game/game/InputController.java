@@ -72,6 +72,8 @@ public class InputController {
         a.findViewById(R.id.a_describe).setOnLongClickListener(v -> { engine.cmdMissionStatus(); return true; });
         a.findViewById(R.id.a_interact).setOnLongClickListener(v -> { engine.cmdRepeat(); return true; });
         a.findViewById(R.id.a_hint).setOnLongClickListener(v -> { engine.cmdMissionStatus(); return true; });
+        // Long-press on the navigator = "take me back to where I came from".
+        a.findViewById(R.id.a_nav).setOnLongClickListener(v -> { engine.cmdGoBack(); return true; });
     }
 
     private boolean onGameTouch(MotionEvent ev) {

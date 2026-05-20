@@ -376,18 +376,36 @@ public class GameEngine implements EventSystem.Effects {
         haptics.confirm();
     }
     public void cmdInteract() {
-        Entity e = state.scene.nearest(state.player.x, state.player.y, 1.6f);
+        // Priority order:
+        // 1. The active (or just-completed) navigation target, if within 3 tiles
+        //    — this fixes the case where the player navigated TO a target but
+        //    a different entity is geometrically closer (e.g. desk beside cane).
+        // 2. Otherwise the nearest entity within a generous 3-tile radius.
+        Entity e = null;
+        Entity navTarget = nav.target();
+        if (navTarget != null) {
+            float dx = navTarget.x - state.player.x;
+            float dy = navTarget.y - state.player.y;
+            if (dx * dx + dy * dy <= 9f) {
+                e = navTarget;
+            }
+        }
         if (e == null) {
-            tts.speakNow("لا يوجد شيء قريب للتفاعل معه.");
+            e = state.scene.nearest(state.player.x, state.player.y, 3.0f);
+        }
+        if (e == null) {
+            tts.speakNow("لا يوجد شيء قريب للتفاعل معه. اقترب أكثر.");
             return;
         }
         // Record interaction flag for missions.
         if (e.id != null) state.flags.add("i:" + e.id);
+        // Clear navigation once we've reached its target.
+        if (e == navTarget) nav.cancel();
 
         if (e.kind == Entity.Kind.DOOR) {
-            Scene.Id target = state.scene.exits.get(e.id);
-            if (target != null) {
-                doTransition(target);
+            Scene.Id targetScene = state.scene.exits.get(e.id);
+            if (targetScene != null) {
+                doTransition(targetScene);
                 return;
             }
         }
@@ -476,6 +494,36 @@ public class GameEngine implements EventSystem.Effects {
         nav.cancel();
         tts.speakNow("ألغيتُ الإرشاد.");
         haptics.confirm();
+    }
+
+    /** Walk the player back to the door leading to the previous scene. */
+    public void cmdGoBack() {
+        if (state == null || state.scene == null) return;
+        if (state.previousSceneId == null) {
+            tts.speakNow("لا يوجد مكان سابق لتعود إليه. هذه نقطة البداية.");
+            return;
+        }
+        for (Entity e : state.scene.entities) {
+            if (e.kind == Entity.Kind.DOOR
+                    && state.scene.exits.get(e.id) == state.previousSceneId) {
+                tts.speakNow("سأرجعك إلى " + sceneName(state.previousSceneId) + ".");
+                startNavigation(e);
+                return;
+            }
+        }
+        tts.speakNow("لا يوجد طريق عودة مباشر من هنا. ابحث عن باب آخر.");
+    }
+
+    private String sceneName(Scene.Id id) {
+        if (id == null) return "المكان السابق";
+        switch (id) {
+            case HOME: return "البيت";
+            case STREET: return "الشارع";
+            case UNIVERSITY: return "الجامعة";
+            case CAFE: return "المقهى";
+            case LIBRARY: return "المكتبة";
+        }
+        return "المكان السابق";
     }
 
     private void doTransition(Scene.Id target) {

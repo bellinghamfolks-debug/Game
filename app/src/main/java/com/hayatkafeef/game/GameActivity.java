@@ -324,6 +324,7 @@ public class GameActivity extends Activity implements GameEngine.View {
 
     @Override
     public void onHazardResolved(String text, boolean impact) {
+        if (impact && gameView != null) gameView.shake(0.7f, 700);
         if (hazardBanner == null) return;
         hazardSub.setText(text);
         hazardText.setText(impact ? "ارتطام" : "نجوت!");
