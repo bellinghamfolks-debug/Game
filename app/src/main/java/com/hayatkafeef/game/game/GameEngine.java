@@ -376,44 +376,90 @@ public class GameEngine implements EventSystem.Effects {
         haptics.confirm();
     }
     public void cmdInteract() {
-        // Priority order:
-        // 1. The active (or just-completed) navigation target, if within 3 tiles
-        //    — this fixes the case where the player navigated TO a target but
-        //    a different entity is geometrically closer (e.g. desk beside cane).
-        // 2. Otherwise the nearest entity within a generous 3-tile radius.
-        Entity e = null;
-        Entity navTarget = nav.target();
-        if (navTarget != null) {
-            float dx = navTarget.x - state.player.x;
-            float dy = navTarget.y - state.player.y;
-            if (dx * dx + dy * dy <= 9f) {
-                e = navTarget;
+        if (state == null || state.scene == null) return;
+
+        Entity chosen = pickInteractTarget();
+        if (chosen == null) {
+            // Tell the player WHAT is nearby so they know how far to walk.
+            Entity scan = state.scene.nearest(state.player.x, state.player.y, 6.0f);
+            if (scan != null) {
+                float d = (float) Math.hypot(scan.x - state.player.x, scan.y - state.player.y);
+                int steps = Math.max(1, Math.round(d));
+                tts.speakNow("لا شيء قريب جدًا للتفاعل. " + scan.name + " على بُعد " + steps
+                        + " خطوة. اقترب أكثر.");
+            } else {
+                tts.speakNow("لا يوجد شيء حولك للتفاعل معه.");
             }
-        }
-        if (e == null) {
-            e = state.scene.nearest(state.player.x, state.player.y, 3.0f);
-        }
-        if (e == null) {
-            tts.speakNow("لا يوجد شيء قريب للتفاعل معه. اقترب أكثر.");
             return;
         }
-        // Record interaction flag for missions.
+        handleInteraction(chosen);
+    }
+
+    /**
+     * Picks the best target for a tap. In priority order:
+     *   1. The active or just-reached navigation target if within 3.5 tiles.
+     *   2. The nearest DOOR within 1.8 tiles (doors win over other things you
+     *      might be brushing against, because the player almost always wants
+     *      to enter a door, not chat with a passer-by next to it).
+     *   3. The nearest entity within 3.0 tiles, with PERSON tie-breaking
+     *      against generic objects when equidistant.
+     */
+    private Entity pickInteractTarget() {
+        Entity navTgt = nav.target();
+        if (navTgt != null) {
+            float dx = navTgt.x - state.player.x;
+            float dy = navTgt.y - state.player.y;
+            if (dx * dx + dy * dy <= 12.25f) return navTgt; // 3.5 tile radius
+        }
+        Entity bestDoor = null, bestPerson = null, bestOther = null;
+        float bestDoorD = Float.MAX_VALUE, bestPersonD = Float.MAX_VALUE, bestOtherD = Float.MAX_VALUE;
+        for (Entity e : state.scene.entities) {
+            float dx = e.x - state.player.x;
+            float dy = e.y - state.player.y;
+            float d = (float) Math.sqrt(dx * dx + dy * dy);
+            if (d > 3.0f) continue;
+            if (e.kind == Entity.Kind.DOOR) {
+                if (d < bestDoorD) { bestDoor = e; bestDoorD = d; }
+            } else if (e.kind == Entity.Kind.PERSON) {
+                if (d < bestPersonD) { bestPerson = e; bestPersonD = d; }
+            } else {
+                if (d < bestOtherD) { bestOther = e; bestOtherD = d; }
+            }
+        }
+        // doors are sticky — if a door is close-ish, prefer it
+        if (bestDoor != null && bestDoorD < 1.8f) return bestDoor;
+        // otherwise pick the geometrically nearest of any kind
+        Entity nearest = null;
+        float bestD = Float.MAX_VALUE;
+        if (bestPerson != null && bestPersonD < bestD) { nearest = bestPerson; bestD = bestPersonD; }
+        if (bestOther != null && bestOtherD < bestD) { nearest = bestOther; bestD = bestOtherD; }
+        if (bestDoor != null && bestDoorD < bestD) { nearest = bestDoor; bestD = bestDoorD; }
+        return nearest;
+    }
+
+    private void handleInteraction(Entity e) {
+        if (e == null) return;
         if (e.id != null) state.flags.add("i:" + e.id);
-        // Clear navigation once we've reached its target.
-        if (e == navTarget) nav.cancel();
+        if (e == nav.target()) nav.cancel();
 
         if (e.kind == Entity.Kind.DOOR) {
             Scene.Id targetScene = state.scene.exits.get(e.id);
             if (targetScene != null) {
+                // Explicit confirmation so the player NEVER feels they tapped a dead thing.
+                tts.speakNow("تفتح " + e.name + " وتدخل إلى " + sceneName(targetScene) + ".");
                 doTransition(targetScene);
                 return;
             }
+            // Door with no exit — still confirm we registered the tap.
+            tts.speakNow(e.name + ". " + (e.tag != null ? e.tag : "هذا الباب مغلق."));
+            haptics.confirm();
+            addLog("تفاعلت مع " + e.name);
+            return;
         }
         if (e.kind == Entity.Kind.PERSON) {
             bridge.requestDialog(e);
             return;
         }
-        // generic: speak and log
         String msg = e.name + ". " + (e.tag != null ? e.tag : "");
         tts.speakNow(msg);
         addLog("تفاعلت مع " + e.name);

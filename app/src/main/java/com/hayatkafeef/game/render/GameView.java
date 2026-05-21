@@ -201,18 +201,24 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         // walking camera bob
         float camBobY = playerMoving ? (float) Math.sin(playerBobPhase) * 3f : 0f;
 
+        // Phase A — ROTATED WORLD: ground + ground-bound particles.
+        float angleRad = (float) (-Math.PI / 2 - state.player.heading);
+        float cosA = (float) Math.cos(angleRad);
+        float sinA = (float) Math.sin(angleRad);
         c.save();
         c.translate(cx + sx, cy + sy + camBobY);
-        c.rotate((float) Math.toDegrees(-Math.PI / 2 - state.player.heading));
+        c.rotate((float) Math.toDegrees(angleRad));
         c.translate(-state.player.x * tile, -state.player.y * tile);
-
         drawGround(c, scene, tile);
-        drawEntityShadows(c, scene, tile);
-        drawEntities(c, scene, tile);
-        drawPlayer(c, tile);
         drawWorldParticles(c, tile);
-
         c.restore();
+
+        // Phase B — SCREEN-SPACE: entities (with lift + shadows) and the
+        // player (always upright facing 'up'). This guarantees lifts go
+        // toward the top of the screen and shadows fall down-right
+        // regardless of which world direction the player is facing.
+        drawEntitiesScreen(c, scene, tile, cx + sx, cy + sy + camBobY, cosA, sinA);
+        drawPlayerScreen(c, tile, cx + sx, cy + sy + camBobY);
 
         // ---- post-process overlays in screen space ----
         drawAmbient(c, w, h, scene.id);
@@ -349,82 +355,137 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback, Run
         return bm;
     }
 
-    private void drawEntityShadows(Canvas c, Scene scene, float tile) {
-        for (Entity e : scene.entities) {
-            float ex = e.x * tile;
-            float ey = e.y * tile;
-            paint.setShader(new RadialGradient(ex, ey + tile * 0.55f,
-                    e.radius * tile * 1.4f,
-                    new int[]{0x66000000, 0x22000000, 0x00000000},
-                    new float[]{0f, 0.6f, 1f}, Shader.TileMode.CLAMP));
-            c.drawOval(ex - e.radius * tile * 1.2f,
-                    ey + tile * 0.30f,
-                    ex + e.radius * tile * 1.2f,
-                    ey + tile * 0.65f, paint);
-            paint.setShader(null);
+    /**
+     * Per-kind notional height in tiles. Drives vertical lift and shadow length.
+     */
+    private static float entityHeight(Entity.Kind k) {
+        switch (k) {
+            case PERSON: return 1.7f;
+            case TREE: return 3.0f;
+            case WALL: return 2.5f;
+            case BUS: return 2.0f;
+            case CAR: return 1.1f;
+            case DESK: return 0.8f;
+            case BED: return 0.5f;
+            case DOOR: return 2.3f;
+            case FOUNTAIN: return 0.5f;
+            case PILLAR: return 2.6f;
+            case ELEVATOR: return 2.5f;
+            case BENCH: return 0.7f;
+            case STAIRS: return 1.0f;
+            case SHOP: return 1.6f;
         }
+        return 1.0f;
     }
 
-    private void drawEntities(Canvas c, Scene scene, float tile) {
+    /**
+     * Draw all entities in screen-space, so lift is always toward the top of
+     * the screen and shadows fall down-right regardless of player heading.
+     * Sprites stay upright on screen (true top-down).
+     */
+    private void drawEntitiesScreen(Canvas c, Scene scene, float tile,
+                                     float cx, float cy, float cosA, float sinA) {
         List<Entity> sorted = new ArrayList<>(scene.entities);
-        java.util.Collections.sort(sorted, (a, b) -> Float.compare(a.y, b.y));
-        int sizePx = (int) (tile * 1.8f);
+        final float fcos = cosA, fsin = sinA;
+        final float fpx = state.player.x, fpy = state.player.y;
+        java.util.Collections.sort(sorted, (a, b) -> {
+            float ay = (a.x - fpx) * fsin + (a.y - fpy) * fcos;
+            float by = (b.x - fpx) * fsin + (b.y - fpy) * fcos;
+            return Float.compare(ay, by);
+        });
+        int sizePx = (int) (tile * 2.0f);
         float time = t();
-
         for (Entity e : sorted) {
-            Bitmap sprite = sprites.get(e.kind, sizePx);
-            float ex = e.x * tile, ey = e.y * tile;
+            float relX = e.x - state.player.x;
+            float relY = e.y - state.player.y;
+            float sX = relX * cosA - relY * sinA;
+            float sY = relX * sinA + relY * cosA;
+            float pixelX = cx + sX * tile;
+            float pixelY = cy + sY * tile;
 
+            float height = entityHeight(e.kind);
+            float lift = height * tile * 0.22f;
+
+            // shadow (down-right, lengthening with height)
+            float shadowR = e.radius * tile * (1.0f + height * 0.35f);
+            float shadowOffX = lift * 0.55f;
+            float shadowOffY = lift * 0.35f + tile * 0.40f;
+            paint.setShader(new RadialGradient(
+                    pixelX + shadowOffX, pixelY + shadowOffY, shadowR,
+                    new int[]{0x88000000, 0x44000000, 0x00000000},
+                    new float[]{0f, 0.55f, 1f},
+                    Shader.TileMode.CLAMP));
+            c.drawOval(
+                    pixelX + shadowOffX - shadowR,
+                    pixelY + shadowOffY - shadowR * 0.42f,
+                    pixelX + shadowOffX + shadowR,
+                    pixelY + shadowOffY + shadowR * 0.42f, paint);
+            paint.setShader(null);
+
+            Bitmap sprite = sprites.get(e.kind, sizePx);
             switch (e.kind) {
                 case TREE: {
-                    // sway: rotate around the trunk base
-                    float sway = (float) Math.sin(time * 0.8f + e.x * 0.7f) * 2.4f;
+                    float sway = (float) Math.sin(time * 0.8f + e.x * 0.7f) * 2.6f;
                     c.save();
-                    c.translate(ex, ey + tile * 0.5f);
+                    c.translate(pixelX, pixelY);
                     c.rotate(sway);
-                    c.drawBitmap(sprite, -sizePx / 2f, -sizePx / 2f - tile * 0.5f, paint);
+                    c.drawBitmap(sprite, -sizePx / 2f, -sizePx / 2f - lift, paint);
                     c.restore();
                     break;
                 }
                 case PERSON: {
-                    // breathing: subtle vertical scale
-                    float breath = 1f + (float) Math.sin(time * 1.6f + e.x * 0.9f) * 0.022f;
+                    float breath = 1f + (float) Math.sin(time * 1.6f + e.x * 0.9f) * 0.025f;
+                    float sway = (float) Math.sin(time * 1.0f + e.x * 0.3f) * tile * 0.03f;
                     c.save();
-                    c.translate(ex, ey);
+                    c.translate(pixelX + sway, pixelY);
                     c.scale(1f, breath, 0, sizePx * 0.2f);
-                    c.drawBitmap(sprite, -sizePx / 2f, -sizePx / 2f, paint);
+                    c.drawBitmap(sprite, -sizePx / 2f, -sizePx / 2f - lift, paint);
                     c.restore();
                     break;
                 }
                 case FOUNTAIN: {
-                    // water pulse: gentle scale of whole sprite
-                    float pulse = 1f + (float) Math.sin(time * 3.2f) * 0.018f;
+                    float pulse = 1f + (float) Math.sin(time * 3.2f) * 0.020f;
                     c.save();
-                    c.translate(ex, ey);
+                    c.translate(pixelX, pixelY);
                     c.scale(pulse, pulse);
-                    c.drawBitmap(sprite, -sizePx / 2f, -sizePx / 2f, paint);
+                    c.drawBitmap(sprite, -sizePx / 2f, -sizePx / 2f - lift, paint);
                     c.restore();
                     break;
                 }
                 case BUS: case CAR: {
-                    // subtle bob to suggest idle engine
-                    float bob = (float) Math.sin(time * 6.5f + e.x) * 0.6f;
-                    c.drawBitmap(sprite, ex - sizePx / 2f, ey - sizePx / 2f + bob, paint);
+                    float bob = (float) Math.sin(time * 6.5f + e.x) * 0.7f;
+                    c.drawBitmap(sprite, pixelX - sizePx / 2f,
+                            pixelY - sizePx / 2f - lift + bob, paint);
                     break;
                 }
                 default:
-                    c.drawBitmap(sprite, ex - sizePx / 2f, ey - sizePx / 2f, paint);
+                    c.drawBitmap(sprite, pixelX - sizePx / 2f,
+                            pixelY - sizePx / 2f - lift, paint);
             }
         }
     }
 
-    private void drawPlayer(Canvas c, float tile) {
-        int psize = (int) (tile * 1.7f);
-        float bob = playerMoving ? (float) Math.sin(playerBobPhase) * tile * 0.04f : 0f;
-        Bitmap sprite = sprites.player(psize, state.player.heading);
-        c.drawBitmap(sprite,
-                state.player.x * tile - psize / 2f,
-                state.player.y * tile - psize / 2f - bob, paint);
+    /** Draw the player at screen center, always upright, cane pointing 'up'. */
+    private void drawPlayerScreen(Canvas c, float tile, float cx, float cy) {
+        int psize = (int) (tile * 2.0f);
+        float bob = playerMoving ? (float) Math.sin(playerBobPhase) * tile * 0.06f : 0f;
+        float lift = entityHeight(Entity.Kind.PERSON) * tile * 0.22f;
+        float shadowR = tile * 0.58f;
+        // shadow lower-right
+        paint.setShader(new RadialGradient(
+                cx + tile * 0.32f, cy + tile * 0.52f, shadowR,
+                new int[]{0x88000000, 0x44000000, 0x00000000},
+                new float[]{0f, 0.55f, 1f},
+                Shader.TileMode.CLAMP));
+        c.drawOval(
+                cx + tile * 0.32f - shadowR,
+                cy + tile * 0.52f - shadowR * 0.42f,
+                cx + tile * 0.32f + shadowR,
+                cy + tile * 0.52f + shadowR * 0.42f, paint);
+        paint.setShader(null);
+        // sprite — heading -PI/2 makes the cane in the sprite point up on screen.
+        Bitmap sprite = sprites.player(psize, (float) (-Math.PI / 2));
+        c.drawBitmap(sprite, cx - psize / 2f, cy - psize / 2f - lift - bob, paint);
     }
 
     private void drawWorldParticles(Canvas c, float tile) {
