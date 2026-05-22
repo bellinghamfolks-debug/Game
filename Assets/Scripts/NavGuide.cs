@@ -36,6 +36,7 @@ namespace BlindLife
             _player = player;
             _reached = false;
             _nextUpdate = Time.time + 2f;
+            GameManager.Instance?.NotifyNav();
             float dist = Vector3.Distance(player.position, target.transform.position);
             int steps = Mathf.Max(1, Mathf.RoundToInt(dist / 0.7f));
             AccessibilityManager.Instance?.SpeakNow(

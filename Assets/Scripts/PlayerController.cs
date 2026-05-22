@@ -139,6 +139,7 @@ namespace BlindLife
         public void CmdWalk()
         {
             _walking = true;
+            GameManager.Instance?.NotifyWalk();
             AccessibilityManager.Instance?.SpeakNow("مشي");
             AccessibilityManager.Instance?.Confirm();
         }
@@ -168,8 +169,9 @@ namespace BlindLife
         {
             string s = EnvDescriber.Describe(transform);
             AccessibilityManager.Instance?.SpeakNow(s);
+            GameManager.Instance?.NotifyDescribe();
         }
 
-        public float HeadingRad => _heading;
+        public float HeadingRad { get => _heading; set => _heading = value; }
     }
 }

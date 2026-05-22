@@ -68,6 +68,10 @@ namespace BlindLife
             BuildNPCs();
             var player = BuildPlayer();
             BuildSky();
+            // Street furniture + ground markings for a denser feel.
+            var decoRoot = new GameObject("Decorations");
+            decoRoot.transform.SetParent(_root);
+            BlindLife.World.WorldDecorations.Build(decoRoot.transform);
             BuildNavMesh();
 
             // Accessibility singleton first so spoken setup messages work.
@@ -272,6 +276,10 @@ namespace BlindLife
             npc.name = id;
             npc.tag = "NPC";
             npc.AddComponent<Interactable>().Setup(InteractableKind.Person, id, displayName);
+            // Ambient walking so the world feels alive.
+            var wand = npc.AddComponent<BlindLife.World.NpcWanderer>();
+            wand.radius = 2.5f;
+            wand.speed = 0.6f;
         }
 
         GameObject BuildPlayer()
@@ -309,6 +317,7 @@ namespace BlindLife
             cap.center = new Vector3(0, 0.9f, 0);
             player.AddComponent<PlayerController>();
             player.AddComponent<InteractionFinder>();
+            player.AddComponent<BlindLife.World.PlayerWalkBob>();
 
             // Camera follow
             var camRig = new GameObject("CameraRig");
@@ -343,6 +352,8 @@ namespace BlindLife
             sun.intensity = 1.05f;
             sun.shadows = LightShadows.Soft;
             sun.transform.rotation = Quaternion.Euler(50f, -30f, 0);
+            // Drive the sun across the in-game day.
+            sunGo.AddComponent<BlindLife.World.DayNightCycle>();
         }
 
         void BuildNavMesh()

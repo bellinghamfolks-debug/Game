@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using BlindLife.Achievements;
 using BlindLife.AI;
 using BlindLife.Hazards;
 using BlindLife.Missions;
@@ -25,6 +26,7 @@ namespace BlindLife
         public AiSummaryManager Summaries { get; private set; }
         public AiDialogueManager Dialogues { get; private set; }
         public CharacterMemory Memory { get; } = new CharacterMemory();
+        public AchievementManager Ach { get; } = new AchievementManager();
         public HazardSystem Hazards { get; private set; }
         public HudController Hud { get; set; }
         public VisionFilter Vision { get; set; }
@@ -51,7 +53,20 @@ namespace BlindLife
         public void OnWorldReady()
         {
             Memory.Load();
+            Ach.Load();
+            // Restore previous session if any.
+            if (SaveManager.HasSave)
+            {
+                SaveManager.Load(State, out Vector3 savedPos, out float savedHeading);
+                if (Player != null)
+                {
+                    Player.position = savedPos;
+                    var pc = Player.GetComponent<PlayerController>();
+                    if (pc != null) pc.HeadingRad = savedHeading;
+                }
+            }
             BuildAi();
+            if (Ai != null && Ai.IsConfigured) Ach.Unlock(BlindLife.Achievements.Achievements.AiUser);
             Hazards = gameObject.AddComponent<HazardSystem>();
             Hazards.SetDifficulty(PlayerPrefs.GetInt(PrefKeyDifficulty, 1));
             Hazards.OnWarning  += OnHazardWarning;
@@ -96,7 +111,11 @@ namespace BlindLife
             if (it == null) return;
             if (!string.IsNullOrEmpty(it.id)) State.SetFlag("i:" + it.id);
             if (it.kind == InteractableKind.Person)
+            {
                 Memory.RecordInteraction(it.id);
+                Ach.RecordDistinct("npc", it.id, 5, BlindLife.Achievements.Achievements.Social);
+                if (it.id == "librarian") Ach.Unlock(BlindLife.Achievements.Achievements.BookLover);
+            }
             Log.Add(State.FormatTime(), "تفاعل مع " + (it.displayName ?? it.id));
         }
 
@@ -118,6 +137,8 @@ namespace BlindLife
             string msg = OfflineContent.DayComplete(State.day);
             AccessibilityManager.Instance?.SpeakNow(msg);
             Log.Add(State.FormatTime(), msg);
+            if (State.day == 1) Ach.Unlock(BlindLife.Achievements.Achievements.DayOne);
+            if (State.day >= 7) Ach.Unlock(BlindLife.Achievements.Achievements.WeekDone);
         }
 
         void OnHazardWarning(string text, string shortLabel, float window)
@@ -129,11 +150,22 @@ namespace BlindLife
 
         void OnHazardResolved(string text, bool impact)
         {
-            if (impact) AccessibilityManager.Instance?.Warn(text);
-            else AccessibilityManager.Instance?.SpeakNow(text);
+            if (impact)
+            {
+                AccessibilityManager.Instance?.Warn(text);
+                _hazardSurvivedStreak = 0;
+            }
+            else
+            {
+                AccessibilityManager.Instance?.SpeakNow(text);
+                _hazardSurvivedStreak++;
+                Ach.Bump("hazard_survive", 5, BlindLife.Achievements.Achievements.Survivor);
+                if (_hazardSurvivedStreak >= 10) Ach.Unlock(BlindLife.Achievements.Achievements.IronWill);
+            }
             Log.Add(State.FormatTime(), text);
             Hud?.ShowHazardResult(text, impact);
         }
+        int _hazardSurvivedStreak;
 
         public void AdvanceDay()
         {
@@ -157,11 +189,27 @@ namespace BlindLife
         public void RequestHint()
         {
             if (Hints == null) return;
+            Ach.Unlock(BlindLife.Achievements.Achievements.FirstHint);
             Hints.Ask(State, Missions?.Current, AiEnabled, (text, fromAi) =>
             {
                 AccessibilityManager.Instance?.SpeakNow(text);
                 Log.Add(State.FormatTime(), "تلميح: " + text);
             });
+        }
+
+        public void NotifyDescribe()
+        {
+            Ach.Bump("describe_count", 10, BlindLife.Achievements.Achievements.Listener);
+        }
+
+        public void NotifyWalk()
+        {
+            Ach.Unlock(BlindLife.Achievements.Achievements.FirstWalk);
+        }
+
+        public void NotifyNav()
+        {
+            Ach.Unlock(BlindLife.Achievements.Achievements.FirstNav);
         }
 
         public void RequestSummary()
@@ -207,6 +255,15 @@ namespace BlindLife
             }
         }
 
-        void OnApplicationQuit() { Memory.Save(); }
+        void OnApplicationQuit()
+        {
+            Memory.Save();
+            Ach.Save();
+            if (Player != null)
+            {
+                var pc = Player.GetComponent<PlayerController>();
+                SaveManager.Save(State, Player.position, pc != null ? pc.HeadingRad : 0f);
+            }
+        }
     }
 }
