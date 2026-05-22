@@ -109,6 +109,26 @@ namespace BlindLife
             if (Input.GetKeyDown(KeyCode.RightArrow)) CmdTurnRight();
             if (Input.GetKeyDown(KeyCode.Space))      CmdInteract();
             if (Input.GetKeyDown(KeyCode.Tab))        CmdDescribe();
+            if (Input.GetKeyDown(KeyCode.H))          CmdHint();
+            if (Input.GetKeyDown(KeyCode.M))          CmdMissionStatus();
+            if (Input.GetKeyDown(KeyCode.Y))          CmdDaySummary();
+            if (Input.GetKeyDown(KeyCode.R))          CmdRepeat();
+        }
+
+        public void CmdHint()    => GameManager.Instance?.RequestHint();
+        public void CmdMissionStatus()
+        {
+            var m = GameManager.Instance?.Missions?.Current;
+            if (m == null) AccessibilityManager.Instance?.SpeakNow("اكتملت جميع مهام اليوم.");
+            else AccessibilityManager.Instance?.SpeakNow(
+                "المهمة الحالية: " + m.title + ". " + m.description);
+        }
+        public void CmdDaySummary() => GameManager.Instance?.RequestSummary();
+        public void CmdRepeat()
+        {
+            var last = GameManager.Instance?.Log?.Last;
+            AccessibilityManager.Instance?.SpeakNow(
+                last.HasValue ? last.Value.text : "لا يوجد ما أكرره الآن.");
         }
 
         public void CmdWalk()

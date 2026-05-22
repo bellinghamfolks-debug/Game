@@ -66,11 +66,37 @@ namespace BlindLife
             BuildTrees();
             BuildVehicles();
             BuildNPCs();
-            BuildPlayer();
+            var player = BuildPlayer();
             BuildSky();
             BuildNavMesh();
 
+            // Accessibility singleton first so spoken setup messages work.
+            if (AccessibilityManager.Instance == null)
+            {
+                var amGo = new GameObject("Accessibility");
+                amGo.AddComponent<AccessibilityManager>();
+            }
+
             _gm = GameManager.Instance ?? gameObject.AddComponent<GameManager>();
+            _gm.Player = player.transform;
+
+            // HUD overlay
+            var hudGo = new GameObject("Hud");
+            hudGo.transform.SetParent(transform);
+            _gm.Hud = hudGo.AddComponent<BlindLife.UI.HudController>();
+
+            // Vision filter
+            var visionGo = new GameObject("Vision");
+            visionGo.transform.SetParent(transform);
+            _gm.Vision = visionGo.AddComponent<BlindLife.Vision.VisionFilter>();
+
+            // NavGuide singleton
+            if (BlindLife.NavGuide.Instance == null)
+            {
+                var navGo = new GameObject("NavGuide");
+                navGo.AddComponent<BlindLife.NavGuide>();
+            }
+
             _gm.OnWorldReady();
         }
 
@@ -237,7 +263,7 @@ namespace BlindLife
             npc.AddComponent<Interactable>().Setup(InteractableKind.Person, id, displayName);
         }
 
-        void BuildPlayer()
+        GameObject BuildPlayer()
         {
             GameObject player;
             if (playerPrefab != null) { player = Instantiate(playerPrefab, new Vector3(0, 0, 0), Quaternion.identity); }
@@ -286,6 +312,7 @@ namespace BlindLife
                 Camera.main.fieldOfView = 60f;
                 Camera.main.gameObject.AddComponent<CameraFollow>().target = player.transform;
             }
+            return player;
         }
 
         void BuildSky()

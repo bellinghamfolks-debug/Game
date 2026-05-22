@@ -27,7 +27,19 @@ namespace BlindLife
             string opener = Openers.TryGetValue(npc.id, out var s)
                 ? s
                 : ((npc.displayName ?? "غريب") + " يبتسم لك ويقول السلام عليكم.");
-            AccessibilityManager.Instance?.SpeakNow(npc.displayName + ". " + opener);
+
+            var gm = GameManager.Instance;
+            if (gm != null && gm.Dialogues != null && gm.AiEnabled)
+            {
+                gm.Dialogues.EnrichReply(npc.id, npc.displayName, opener, true, (text, fromAi) =>
+                {
+                    AccessibilityManager.Instance?.SpeakNow((npc.displayName ?? "") + ". " + text);
+                });
+            }
+            else
+            {
+                AccessibilityManager.Instance?.SpeakNow((npc.displayName ?? "") + ". " + opener);
+            }
             AccessibilityManager.Instance?.Confirm();
         }
     }

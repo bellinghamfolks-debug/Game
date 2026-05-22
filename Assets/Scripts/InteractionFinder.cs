@@ -76,11 +76,13 @@ namespace BlindLife
         void Resolve(Interactable it)
         {
             if (it == null) return;
+            // Mission flag + memory FIRST so the OnInteract hook fires before TTS.
+            GameManager.Instance?.OnInteract(it);
             switch (it.kind)
             {
                 case InteractableKind.Door:
                     AccessibilityManager.Instance?.SpeakNow(
-                        "تفتح " + it.displayName + (string.IsNullOrEmpty(it.destinationSceneId) ? "." : " وتدخل."));
+                        "تفتح " + it.displayName + ".");
                     AccessibilityManager.Instance?.Confirm();
                     break;
                 case InteractableKind.Person:
@@ -92,7 +94,6 @@ namespace BlindLife
                     AccessibilityManager.Instance?.Confirm();
                     break;
             }
-            GameManager.Instance?.OnInteract(it);
         }
     }
 }
