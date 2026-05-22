@@ -1,91 +1,148 @@
-# حياة كفيف · Blind Life
+# حياة كفيف — Blind Life (Unity 3D Edition)
 
-> عش الحياة من زاوية لم ترَها من قبل · Live life from an angle you have never seen.
+> لعبة قصصية ثلاثية الأبعاد مصممة بإمكانية وصول كاملة للمكفوفين وضعاف البصر، تعمل أيضًا للمبصرين. الإصدار الحالي مبني على **Unity 2022.3 LTS** بنظام رسم 3D حقيقي.
 
-لعبة أندرويد قصصية مصممة بإمكانية وصول كاملة للمكفوفين وضعاف البصر، وممتعة كذلك للمبصرين. تعمل مع TalkBack مباشرة، تستخدم الإيماءات، الصوت الاتجاهي، الاهتزازات، ووصف بيئة ذكي بدون إنترنت.
+> **النسخة السابقة (Canvas 2D Java):** محفوظة في تاريخ git على commit `16d3c3f`. للرجوع لها:
+> ```bash
+> git checkout 16d3c3f
+> ```
 
 ---
 
-## كيف تحصل على ملف الـ APK جاهزًا
+## ما الذي تحتاجه قبل أن يبنى الـ APK
 
-هذا المستودع فيه GitHub Actions يبني ملف APK تلقائيًّا على كل push.
+الـ APK **لن يُبنى تلقائيًا** إلا بعد إضافة ترخيص Unity إلى GitHub. هذه الخطوات لمرة واحدة فقط:
 
-1. ادفع الكود (أو افتح المستودع على GitHub).
-2. افتح تبويب **Actions**.
-3. اختر آخر تشغيل لـ **Build Hayat Kafeef APK**.
-4. انتظر ~5 دقائق.
-5. من قسم **Artifacts**، نزّل `HayatKafeef-debug-apk`.
-6. ثبت ملف الـ `.apk` على هاتفك.
+### الخطوة 1: تثبيت Unity Hub على جهازك
 
-> لا يحتاج جهازك إلى Android Studio. الـ workflow يهتم بكل شيء.
+نزّل من: https://unity.com/download
 
-## بناء محلي (اختياري)
+### الخطوة 2: تثبيت محرر Unity 2022.3.40f1
 
-إذا أردت بناءه محليًّا:
+في Unity Hub → Installs → Install Editor → اختر **2022.3.40f1 (LTS)**.
 
-```bash
-gradle wrapper --gradle-version 8.5 --distribution-type bin
-./gradlew :app:assembleDebug
+### الخطوة 3: إنشاء حساب Unity والحصول على ترخيص شخصي مجاني
+
+1. سجّل حسابًا على https://id.unity.com
+2. في Unity Hub → الإعدادات (⚙️) → Licenses → Add → Get a free personal license
+3. وافق على شروط Unity Personal (مجاني للأفراد).
+
+### الخطوة 4: استخراج ملف الترخيص للاستخدام في GitHub Actions
+
+#### الطريقة الأسرع: GitHub Action لطلب الترخيص
+
+```yaml
+# ضع هذا في .github/workflows/activation.yml واحذفه بعد الحصول على الملف
+name: Acquire activation file
+on: workflow_dispatch
+jobs:
+  activation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: game-ci/unity-request-activation-file@v2
+        id: getManualLicenseFile
+        with:
+          unityVersion: 2022.3.40f1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ManualLicenseFile.alf
+          path: ${{ steps.getManualLicenseFile.outputs.filePath }}
 ```
 
-سيكون الـ APK في:
-`app/build/outputs/apk/debug/app-debug.apk`
+شغّل الـ workflow، نزّل ملف `.alf` الناتج، ارفعه على:
+https://license.unity3d.com/manual
 
-## دليل المستخدم
+سيُنزّل لك ملف `.ulf`. هذا ملف الترخيص.
 
-دليل المستخدم الكامل موجود **داخل اللعبة نفسها**: من القائمة الرئيسية اختر "دليل المستخدم". يمكنه أيضًا أن يُقرأ لك صوتيًّا بضغطة زر.
+### الخطوة 5: أضف ملف الترخيص كـ GitHub Secret
 
-نسخة موجزة:
+1. افتح المستودع على GitHub.
+2. Settings → Secrets and variables → Actions → New repository secret.
+3. الاسم: `UNITY_LICENSE`
+4. القيمة: انسخ كامل محتوى ملف `.ulf` والصقه.
+5. (اختياري) أضف `UNITY_EMAIL` و `UNITY_PASSWORD` إذا أردت استخدام ترخيص محترف.
 
-- **اسحب للأعلى**: مشي للأمام.
-- **اسحب للأسفل**: توقف.
-- **اسحب يمين/يسار**: استدارة.
-- **انقر مرتين**: تفاعل مع أقرب شيء.
-- **اضغط مطوّلًا**: وصف ما حولك.
-- **هز الجهاز**: إعادة ضبط الاتجاه.
+### الخطوة 6: ادفع تغييرًا (أي تغيير)
 
-## ميزات
+كل push على فرع `main` أو `claude/**` يبني APK تلقائيًا. نزّله من Actions → آخر تشغيل → Artifacts → `BlindLife-Unity-APK`.
 
-- ست حالات رؤية تغيّر طريقة عرض اللعبة فعليًّا.
-- صوت اتجاهي (Pan + Volume) مولّد لحظيًا بدون أصول صوتية كبيرة.
-- اهتزازات بأنماط مختلفة: قريب، عائق، خطر، درج.
-- وصف بيئة ذكي بقوالب عربية بدون إنترنت.
-- شخصيات وحوارات تؤثر على مهاراتك (الحركة، العلاقات، التقنية، الثقة).
-- أربعة أماكن: البيت، الشارع، الجامعة، المقهى.
-- نظام أحداث عشوائية: حافلة، دراجة، مطر، مصعد معطل، طلب مساعدة.
-- حفظ ومتابعة محلي.
-- دعم TalkBack كامل + أزرار كبيرة بديلة للإيماءات.
-- اتصال اختياري بمساعد ذكاء اصطناعي لإثراء الحوارات (Gemini / OpenAI عبر بروكسي).
+---
 
-## ربط مساعد الذكاء الاصطناعي (اختياري)
+## بنية المشروع
 
-اللعبة تعمل بالكامل بدون إنترنت. إذا أردت حوارات أكثر تنوعًا، هناك طريقتان:
+```
+.
+├── Assets/
+│   ├── Scenes/MainScene.unity        ← المشهد الرئيسي (شبه فارغ — كل العالم يُبنى برمجيًا)
+│   ├── Editor/BuildScript.cs         ← يستخدمه CI لبناء الـAPK
+│   └── Scripts/
+│       ├── GameBootstrap.cs          ← يبني العالم: أرض، طرق، مبانٍ، شخصيات، لاعب
+│       ├── PlayerController.cs       ← الحركة + الإيماءات + لوحة المفاتيح للتجريب
+│       ├── InteractionFinder.cs      ← تفاعل ذكي مع تفضيل الأبواب
+│       ├── Interactable.cs           ← كل شيء قابل للتفاعل
+│       ├── AccessibilityManager.cs   ← TTS + اهتزاز موحّد
+│       ├── TtsManager.cs             ← يستدعي android.speech.tts.TextToSpeech
+│       ├── HapticManager.cs          ← يستدعي android.os.Vibrator
+│       ├── EnvDescriber.cs           ← وصف عربي لما حول اللاعب
+│       ├── NavGuide.cs               ← إرشاد صوتي إلى وجهة
+│       ├── DialogueSystem.cs         ← حوارات أساسية
+│       ├── GameManager.cs            ← مهام، يوم/ليل، حفظ
+│       └── CameraFollow.cs           ← كاميرا تتبع لاعب
+├── ProjectSettings/                  ← إعدادات Unity (يفتحها Unity Hub تلقائيًا)
+├── Packages/manifest.json            ← قائمة حزم Unity
+└── .github/workflows/build-unity-apk.yml
+```
 
-### الطريقة السهلة: مفتاح Gemini مباشرة (موصى به)
+## استبدال الرسومات بأصول احترافية
 
-1. افتح [Google AI Studio](https://aistudio.google.com/app/apikey) واحصل على مفتاح API مجاني.
-2. افتح **الإعدادات** في اللعبة → الصق المفتاح في حقل **مفتاح Gemini**.
-3. (اختياري) اكتب اسم موديل: الافتراضي `gemini-2.5-flash`. للجودة الأعلى استخدم `gemini-2.5-pro`.
-4. اضغط **اختبر الاتصال** ثم **حفظ**.
+كل شيء حاليًا مرسوم بـ **primitives** (cubes, capsules, spheres) كنقطة بداية. لتحويل المشروع لأسلوب GTA:
 
-> المفتاح يُحفظ على جهازك فقط، ويُرسَل مباشرة إلى Google. لا يمر بأي خادم آخر. لا تشارك ملف الـ APK بعد إدخال مفتاحك.
+1. اشتر حزمة أصول من Unity Asset Store. توصيات:
+   - **Synty Studios** (Simple City, POLYGON City Pack) — أسلوب stylized
+   - **Realistic City Pack** — أسلوب واقعي
+   - **Mixamo Characters** — شخصيات مجانية بـ animations
 
-### الطريقة المتقدمة: بروكسي خاص
+2. استورد الحزمة في Unity Editor.
 
-إذا كنت تريد أن يبقى المفتاح على خادم بدل الجهاز:
+3. افتح `GameBootstrap.cs` في Inspector، اسحب prefabs الأصول إلى الحقول:
+   - `Player Prefab`
+   - `Building Prefab`
+   - `NPC Prefab`
+   - `Tree Prefab`
+   - `Vehicle Prefab`
 
-1. شغّل بروكسيًّا صغيرًا يستقبل `POST` بهذا الشكل:
-   ```json
-   { "system": "...", "user": "...", "max_tokens": 220 }
-   ```
-   ويُعيد:
-   ```json
-   { "reply": "..." }
-   ```
-2. ضع عنوانه في حقل **رابط بروكسي** في الإعدادات.
+4. أعد التشغيل — العالم يُبنى الآن بالأصول الجديدة.
 
-إذا تم ضبط المفتاح والبروكسي معًا، تستخدم اللعبة المفتاح المباشر.
+## التحكم الحالي
+
+- **سحب للأعلى**: مشي للأمام
+- **سحب للأسفل**: توقف
+- **سحب يمين/يسار**: استدارة
+- **نقرتان**: تفاعل
+- **ضغط مطوّل**: وصف ما حولك
+- **مفاتيح للتجريب على PC**: الأسهم + Space (تفاعل) + Tab (وصف)
+
+## المشاكل المعروفة في هذه النسخة الأولية
+
+- **NavMesh غير محسوب**: المرشد الصوتي يستخدم خط مستقيم حاليًا. لتفعيل تجنّب العوائق:
+  1. افتح المشهد في Unity Editor
+  2. Window → AI → Navigation
+  3. Bake
+- **لا توجد رسوم متحركة للشخصيات**: حركة فقط بدون أرجل تتحرك. يحتاج Mixamo animations.
+- **لا توجد مخاطر فعّالة**: نظام الدراجة/السيارة من إصدار Canvas لم يُنقل بعد.
+- **لا توجد مهام**: نظام المهام في `GameManager` فارغ. سيُنقل من DayScript الخاص بـ Canvas.
+
+كل هذه نقاط للجلسات القادمة.
+
+## استرجاع نسخة Canvas العاملة
+
+```bash
+git checkout 16d3c3f
+# الـ APK سيبنى من هذه النقطة عبر الـ workflow القديم
+```
+
+أو عبر artifact مخزّن لو Actions كان مفعّلًا وقتها.
 
 ## الترخيص
 
-استخدام شخصي وتعليمي. لأي استخدام تجاري راسِل المؤلف.
+استخدام شخصي وتعليمي.
