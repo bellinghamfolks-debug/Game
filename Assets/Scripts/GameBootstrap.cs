@@ -80,10 +80,21 @@ namespace BlindLife
             _gm = GameManager.Instance ?? gameObject.AddComponent<GameManager>();
             _gm.Player = player.transform;
 
-            // HUD overlay
+            // HUD overlay (top bar + hazard banner)
             var hudGo = new GameObject("Hud");
             hudGo.transform.SetParent(transform);
             _gm.Hud = hudGo.AddComponent<BlindLife.UI.HudController>();
+
+            // Action bar (bottom buttons)
+            var actionBarGo = new GameObject("ActionBar");
+            actionBarGo.transform.SetParent(transform);
+            var bar = actionBarGo.AddComponent<BlindLife.UI.ActionBar>();
+            bar.player = player.GetComponent<PlayerController>();
+
+            // UI manager (modal overlays — pause, nav, settings, manual, log)
+            var uiGo = new GameObject("UIManager");
+            uiGo.transform.SetParent(transform);
+            uiGo.AddComponent<BlindLife.UI.UIManager>();
 
             // Vision filter
             var visionGo = new GameObject("Vision");

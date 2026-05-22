@@ -58,6 +58,11 @@ namespace BlindLife
         void HandleTouch()
         {
             if (Input.touchCount == 0) return;
+            // Block world touches while any modal overlay is up.
+            if (BlindLife.UI.UIManager.Instance != null && BlindLife.UI.UIManager.Instance.IsModalOpen) return;
+            // Ignore touches that hit a UI element (button bar, etc).
+            if (UnityEngine.EventSystems.EventSystem.current != null &&
+                UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject(Input.GetTouch(0).fingerId)) return;
             var t = Input.GetTouch(0);
             switch (t.phase)
             {
