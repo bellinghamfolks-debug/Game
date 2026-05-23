@@ -151,29 +151,46 @@ namespace BlindLife.Editor
         public static int AutoWirePrefabs()
         {
             // Patterns we recognise across common packs.
+            // First list = Synty / commercial naming, second = Kenney /
+            // generic / lower-case naming. Either match wires the slot.
             string[] buildingPatterns = {
-                "SM_Bld_", "Bld_", "Building_", "House_", "Shop_", "Office_"
+                // Synty
+                "SM_Bld_", "Building_", "House_", "Shop_", "Office_",
+                // Kenney City Kit Commercial / Suburban
+                "building", "lowpoly_building", "shop_", "house_", "skyscraper",
+                "low-buildingA", "low-buildingB", "low-buildingC", "tower",
             };
             string[] characterPatterns = {
                 "SK_Chr_", "Chr_", "Character_", "NPC_", "Human_", "Person_",
-                "Polygon_Character", "Mixamo"
+                "Polygon_Character", "Mixamo",
+                // Kenney Mini / Toon Characters
+                "character_", "mini_", "toon_", "person", "character-",
+                "boy", "girl", "man", "woman", "advancedCharacter"
             };
             string[] vehiclePatterns = {
-                "SM_Veh_", "Veh_", "Vehicle_", "Car_", "Bus_", "Truck_"
+                "SM_Veh_", "Vehicle_",
+                // Kenney Car Kit
+                "car_", "bus_", "truck_", "police_", "ambulance_", "taxi_",
+                "delivery", "garbage", "race", "sedan", "hatchback", "suv"
             };
             string[] treePatterns = {
-                "SM_Prop_Tree", "Tree_", "Prop_Tree", "Vegetation_Tree",
-                "Foliage_Tree"
+                "SM_Prop_Tree", "Prop_Tree",
+                // Kenney Nature Kit
+                "tree_", "Tree_", "vegetation_tree", "foliage_tree",
+                "tree-pine", "tree-oak", "tree_simple", "tree_default",
+                "pine_default", "oak", "plant"
             };
             string[] playerPatterns = {
-                "Polygon_Character_01", "MainCharacter", "Player_", "MainPlayer"
+                "Polygon_Character_01", "MainCharacter", "Player_", "MainPlayer",
+                // Kenney: just pick the first character if no explicit player
+                "character_male", "character_player", "advancedCharacter"
             };
 
-            GameObject buildingPrefab = FindFirstPrefab(buildingPatterns);
-            GameObject npcPrefab      = FindFirstPrefab(characterPatterns);
-            GameObject playerPrefab   = FindFirstPrefab(playerPatterns) ?? npcPrefab;
-            GameObject vehiclePrefab  = FindFirstPrefab(vehiclePatterns);
-            GameObject treePrefab     = FindFirstPrefab(treePatterns);
+            GameObject buildingPrefab = FindFirstAsset(buildingPatterns);
+            GameObject npcPrefab      = FindFirstAsset(characterPatterns);
+            GameObject playerPrefab   = FindFirstAsset(playerPatterns) ?? npcPrefab;
+            GameObject vehiclePrefab  = FindFirstAsset(vehiclePatterns);
+            GameObject treePrefab     = FindFirstAsset(treePatterns);
 
             int wired = 0;
             var bootstraps = Object.FindObjectsOfType<BlindLife.GameBootstrap>();
@@ -184,11 +201,11 @@ namespace BlindLife.Editor
             }
             foreach (var b in bootstraps)
             {
-                if (buildingPrefab != null) { b.buildingPrefab = buildingPrefab; wired++; }
-                if (npcPrefab      != null) { b.npcPrefab      = npcPrefab;      wired++; }
-                if (playerPrefab   != null) { b.playerPrefab   = playerPrefab;   wired++; }
-                if (vehiclePrefab  != null) { b.vehiclePrefab  = vehiclePrefab;  wired++; }
-                if (treePrefab     != null) { b.treePrefab     = treePrefab;     wired++; }
+                if (buildingPrefab != null) { b.buildingPrefab = buildingPrefab; wired++; Debug.Log("  building ← " + AssetDatabase.GetAssetPath(buildingPrefab)); }
+                if (npcPrefab      != null) { b.npcPrefab      = npcPrefab;      wired++; Debug.Log("  npc ← " + AssetDatabase.GetAssetPath(npcPrefab)); }
+                if (playerPrefab   != null) { b.playerPrefab   = playerPrefab;   wired++; Debug.Log("  player ← " + AssetDatabase.GetAssetPath(playerPrefab)); }
+                if (vehiclePrefab  != null) { b.vehiclePrefab  = vehiclePrefab;  wired++; Debug.Log("  vehicle ← " + AssetDatabase.GetAssetPath(vehiclePrefab)); }
+                if (treePrefab     != null) { b.treePrefab     = treePrefab;     wired++; Debug.Log("  tree ← " + AssetDatabase.GetAssetPath(treePrefab)); }
                 EditorUtility.SetDirty(b);
             }
             EditorSceneManager.MarkAllScenesDirty();
@@ -196,17 +213,29 @@ namespace BlindLife.Editor
             return wired;
         }
 
-        static GameObject FindFirstPrefab(string[] patterns)
+        /// <summary>
+        /// Look for a Prefab OR a Model (FBX/OBJ) whose file name matches any
+        /// of the patterns. Kenney ships FBX models, Synty ships Prefabs —
+        /// both are valid GameObject references for GameBootstrap.
+        /// </summary>
+        static GameObject FindFirstAsset(string[] patterns)
         {
-            string[] guids = AssetDatabase.FindAssets("t:Prefab");
-            foreach (var g in guids)
+            // Prefabs first (Synty / hand-made), then Models (Kenney FBX).
+            foreach (var typeFilter in new[] { "t:Prefab", "t:Model" })
             {
-                string path = AssetDatabase.GUIDToAssetPath(g);
-                string name = Path.GetFileNameWithoutExtension(path);
-                foreach (var p in patterns)
+                string[] guids = AssetDatabase.FindAssets(typeFilter);
+                foreach (var g in guids)
                 {
-                    if (name.IndexOf(p, System.StringComparison.OrdinalIgnoreCase) >= 0)
-                        return AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                    string path = AssetDatabase.GUIDToAssetPath(g);
+                    string name = Path.GetFileNameWithoutExtension(path);
+                    foreach (var p in patterns)
+                    {
+                        if (name.IndexOf(p, System.StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            var go = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                            if (go != null) return go;
+                        }
+                    }
                 }
             }
             return null;
