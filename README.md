@@ -1,0 +1,35 @@
+# من سيربح المليون
+
+لعبة مسابقات عربية أصلية لأجهزة iPhone بنظام iOS 17 أو أحدث. الجوائز افتراضية بالريال السعودي. يعمل التطبيق محليًا ويخزّن الجولة ونتائج اللعب على الجهاز.
+
+## فتح المشروع
+
+افتح `Millionaire.xcodeproj` في Xcode واختر مخطط Millionaire. النقطة الابتدائية في App.swift، وتتبع واجهة SwiftUI حالة الجولة التي يديرها GameVM. يرسم Stage.swift الاستوديو باستخدام SceneKit، ويدير Sound.swift المقاطع المحلّية والانتقالات والنبضات. تتضمن مجلدات Tests وUITests اختبارات المحرك واللعب من الواجهة.
+
+## البناء والتحقق
+
+يعمل المسار الموجود في `.github/workflows/build-ios.yml` عند رفع التغييرات. يفحص المشروع والبنك، ويبني Release لمنصة iPhoneOS، ثم يتحقق من المنصة والمعمارية وبنية Payload والتوقيع. بعد ذلك ينفّذ اختبارات XCTest على محاكي iPhone ويرفع الـIPA والحزمة والمصادر والسجلات. يحتوي أرشيف النتائج على ملف SHA256. للبناء المحلي على macOS من نسخة git كاملة:
+
+```sh
+python3 Tools/check_bank.py
+python3 Tools/generate_project.py --check
+BUNDLE_ID=com.example.millionaire bash Tools/release.sh
+```
+
+ينتج السكربت `dist/Millionaire-iOS-Unsigned.ipa` وحزمة `dist/Millionaire.app.zip`. تتضمن حزمة المصدر الموارد نفسها. لإعادة توليد المشروع بعد إضافة ملفات Swift، شغّل `python3 Tools/generate_project.py`.
+
+## التوقيع لاحقًا
+
+المعرّف الافتراضي هو `app.millionaire.arabic`. يلزم للتثبيت توقيع Apple صالح. في Xcode افتح إعدادات Target ثم Signing & Capabilities، اختر فريقك واضبط BUNDLE_ID إلى المعرّف المسجّل في حسابك. اختر جهازك وشغّل التطبيق، أو استخدم Product → Archive ثم Distribute App للتوزيع المناسب.
+
+لمن يريد توقيع IPA المبني نفسه على macOS: استخدم ملف تخصيص تطوير أو Ad Hoc مطابقًا لمعرّف الحزمة ويتضمن الجهاز وشهادة التوقيع، مع مفتاح الشهادة الخاص في Keychain. يضع سكربت التوقيع الملف داخل التطبيق ويستخرج القيم اللازمة من ملف التخصيص ويتحقق من التوقيع قبل إخراج النسخة الموقّعة:
+
+```sh
+bash Tools/sign-device.sh dist/Millionaire-iOS-Unsigned.ipa MyProfile.mobileprovision 'Apple Development: Your Name (TEAMID)' Millionaire-signed.ipa
+```
+
+بعد التوقيع يمكن تثبيت النسخة من نافذة Devices and Simulators في Xcode. يحدد ملف التخصيص أسلوب التثبيت المسموح.
+
+## بنك الأسئلة
+
+لكل عنصر معرف ونص وأربعة خيارات وفهرس للإجابة الصحيحة من صفر إلى ثلاثة وصعوبة من واحد إلى خمسة وتصنيف وشرح ومرجع. يمكن تضمين حزم إضافية بالصيغة نفسها في ملفات مطابقة للنمط `questionpack-*.json` ضمن موارد التطبيق. راجع Licenses لإسناد البيانات ومصادرها.

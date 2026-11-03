@@ -1,0 +1,461 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+
+	};
+	objectVersion = 56;
+	objects = {
+		DC12CE498DE5CBDB13C29DCB = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = App.swift;
+			sourceTree = "<group>";
+		};
+		38BAB76143A60C3896345025 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = Engine.swift;
+			sourceTree = "<group>";
+		};
+		5349B0C4B8E318B09BFF9635 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = Sound.swift;
+			sourceTree = "<group>";
+		};
+		D52D66F7907610B463FF4054 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = Stage.swift;
+			sourceTree = "<group>";
+		};
+		765251777EB89E04B80DEA21 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = Views.swift;
+			sourceTree = "<group>";
+		};
+		CEB4C0D50A9C80C9E9BD66EB = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.plist.xml;
+			path = Info.plist;
+			sourceTree = "<group>";
+		};
+		1339E2E3CCA98F6F35E6B8FE = {
+			isa = PBXFileReference;
+			lastKnownFileType = text.json;
+			path = Resources/questions.json;
+			sourceTree = "<group>";
+		};
+		D64FBD06F700BA121BF4FE3A = {
+			isa = PBXFileReference;
+			lastKnownFileType = folder;
+			path = Resources/Audio;
+			sourceTree = "<group>";
+		};
+		890BFCC9289800420509A58A = {
+			isa = PBXFileReference;
+			lastKnownFileType = folder.assetcatalog;
+			path = Assets.xcassets;
+			sourceTree = "<group>";
+		};
+		2B473A24FF54CA7CCE5E2C0A = {
+			isa = PBXGroup;
+			path = Millionaire;
+			children = (DC12CE498DE5CBDB13C29DCB, 38BAB76143A60C3896345025, 5349B0C4B8E318B09BFF9635, D52D66F7907610B463FF4054, 765251777EB89E04B80DEA21, CEB4C0D50A9C80C9E9BD66EB, 1339E2E3CCA98F6F35E6B8FE, D64FBD06F700BA121BF4FE3A, 890BFCC9289800420509A58A,);
+			sourceTree = "<group>";
+		};
+		B63C707C6D2F1FA0C65E7C05 = {
+			isa = PBXBuildFile;
+			fileRef = DC12CE498DE5CBDB13C29DCB;
+		};
+		26F706E374FBA475496B44D0 = {
+			isa = PBXBuildFile;
+			fileRef = 38BAB76143A60C3896345025;
+		};
+		A11FF195E351F19912F6FB86 = {
+			isa = PBXBuildFile;
+			fileRef = 5349B0C4B8E318B09BFF9635;
+		};
+		AE67870108C9A64E242F5C78 = {
+			isa = PBXBuildFile;
+			fileRef = D52D66F7907610B463FF4054;
+		};
+		055264B3969E7A43C0159EC9 = {
+			isa = PBXBuildFile;
+			fileRef = 765251777EB89E04B80DEA21;
+		};
+		C4E44039466A867F6D45F482 = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (B63C707C6D2F1FA0C65E7C05, 26F706E374FBA475496B44D0, A11FF195E351F19912F6FB86, AE67870108C9A64E242F5C78, 055264B3969E7A43C0159EC9,);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		376864618F13381B328C4226 = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A4968E018CFCE516319BE16C = {
+			isa = PBXBuildFile;
+			fileRef = 1339E2E3CCA98F6F35E6B8FE;
+		};
+		17AF1BFF1B8F709AA0A2F8E9 = {
+			isa = PBXBuildFile;
+			fileRef = D64FBD06F700BA121BF4FE3A;
+		};
+		E966BFE30724C60E35CDBE70 = {
+			isa = PBXBuildFile;
+			fileRef = 890BFCC9289800420509A58A;
+		};
+		787A34A3620E760FA88115D3 = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (A4968E018CFCE516319BE16C, 17AF1BFF1B8F709AA0A2F8E9, E966BFE30724C60E35CDBE70,);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		27B7E1D1C9493D62A4869497 = {
+			isa = PBXFileReference;
+			explicitFileType = wrapper.application;
+			includeInIndex = 0;
+			path = Millionaire.app;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		CD02BFD500CC78BB68864E44 = {
+			isa = XCBuildConfiguration;
+			name = Debug;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BUNDLE_ID)";
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks",);
+				INFOPLIST_FILE = Millionaire/Info.plist;
+				GENERATE_INFOPLIST_FILE = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+			};
+		};
+		F5B3011B0BF5F6DC78CCBDD8 = {
+			isa = XCBuildConfiguration;
+			name = Release;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BUNDLE_ID)";
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks",);
+				INFOPLIST_FILE = Millionaire/Info.plist;
+				GENERATE_INFOPLIST_FILE = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+			};
+		};
+		39EEE523ED787BE02CEB3A37 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (CD02BFD500CC78BB68864E44, F5B3011B0BF5F6DC78CCBDD8,);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BD57DD118CEA0FD747B5B7DA = {
+			isa = PBXNativeTarget;
+			name = Millionaire;
+			productName = Millionaire;
+			buildConfigurationList = 39EEE523ED787BE02CEB3A37;
+			buildPhases = (C4E44039466A867F6D45F482, 376864618F13381B328C4226, 787A34A3620E760FA88115D3,);
+			buildRules = ();
+			dependencies = ();
+			productReference = 27B7E1D1C9493D62A4869497;
+			productType = "com.apple.product-type.application";
+		};
+		AA97D1B68075FDA89597C58D = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = EngineTests.swift;
+			sourceTree = "<group>";
+		};
+		A3FA273AB62DB7636DA78B08 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = MediaTests.swift;
+			sourceTree = "<group>";
+		};
+		1DC7B43F86200C4DCAAA918A = {
+			isa = PBXGroup;
+			path = Tests;
+			children = (AA97D1B68075FDA89597C58D, A3FA273AB62DB7636DA78B08,);
+			sourceTree = "<group>";
+		};
+		36AC1D5D041707457F67E75E = {
+			isa = PBXBuildFile;
+			fileRef = AA97D1B68075FDA89597C58D;
+		};
+		0591AA56CCF50A5574930F4F = {
+			isa = PBXBuildFile;
+			fileRef = A3FA273AB62DB7636DA78B08;
+		};
+		58EE433EFDF4DEE2B7AEC1B9 = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (36AC1D5D041707457F67E75E, 0591AA56CCF50A5574930F4F,);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6146AFF578EE5D4F09F5F61E = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BA81EC6EF77E2D14550EC73B = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F7C839E3F8040D277DA2E70E = {
+			isa = PBXFileReference;
+			explicitFileType = wrapper.cfbundle;
+			includeInIndex = 0;
+			path = MillionaireTests.xctest;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		4E030947DADF38C845927C8E = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4813494D137E1631BBA301D5;
+			proxyType = 1;
+			remoteGlobalIDString = BD57DD118CEA0FD747B5B7DA;
+			remoteInfo = Millionaire;
+		};
+		2C75E0F5C972086B5F73D75C = {
+			isa = PBXTargetDependency;
+			target = BD57DD118CEA0FD747B5B7DA;
+			targetProxy = 4E030947DADF38C845927C8E;
+		};
+		79CFE2A4835661FD5D927F13 = {
+			isa = XCBuildConfiguration;
+			name = Debug;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BUNDLE_ID).tests";
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks",);
+				GENERATE_INFOPLIST_FILE = YES;
+				SKIP_INSTALL = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Millionaire.app/Millionaire";
+			};
+		};
+		FDD893552BC929451C6330BD = {
+			isa = XCBuildConfiguration;
+			name = Release;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BUNDLE_ID).tests";
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks",);
+				GENERATE_INFOPLIST_FILE = YES;
+				SKIP_INSTALL = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Millionaire.app/Millionaire";
+			};
+		};
+		4BEA155E8B74228818D1C951 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (79CFE2A4835661FD5D927F13, FDD893552BC929451C6330BD,);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BDD6EB497752CBD664A0992F = {
+			isa = PBXNativeTarget;
+			name = MillionaireTests;
+			productName = MillionaireTests;
+			buildConfigurationList = 4BEA155E8B74228818D1C951;
+			buildPhases = (58EE433EFDF4DEE2B7AEC1B9, 6146AFF578EE5D4F09F5F61E, BA81EC6EF77E2D14550EC73B,);
+			buildRules = ();
+			dependencies = (2C75E0F5C972086B5F73D75C,);
+			productReference = F7C839E3F8040D277DA2E70E;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		63CEFF77312C81B7FA5214A0 = {
+			isa = PBXFileReference;
+			lastKnownFileType = sourcecode.swift;
+			path = GameUITests.swift;
+			sourceTree = "<group>";
+		};
+		FF833EAA309E8376EB761B1B = {
+			isa = PBXGroup;
+			path = UITests;
+			children = (63CEFF77312C81B7FA5214A0,);
+			sourceTree = "<group>";
+		};
+		6963A96101DE928CD925D72A = {
+			isa = PBXBuildFile;
+			fileRef = 63CEFF77312C81B7FA5214A0;
+		};
+		BB51DB7E23B38F7C9A33A21C = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (6963A96101DE928CD925D72A,);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		186822A0B7A9983F01808896 = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7B3187D853534B00DE3781BD = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		61E97B3944FCED51AD647B1E = {
+			isa = PBXFileReference;
+			explicitFileType = wrapper.cfbundle;
+			includeInIndex = 0;
+			path = MillionaireUITests.xctest;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		FC28D6514E0F80D89F2EF61D = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 4813494D137E1631BBA301D5;
+			proxyType = 1;
+			remoteGlobalIDString = BD57DD118CEA0FD747B5B7DA;
+			remoteInfo = Millionaire;
+		};
+		D5B7CCC8266C4C275442E274 = {
+			isa = PBXTargetDependency;
+			target = BD57DD118CEA0FD747B5B7DA;
+			targetProxy = FC28D6514E0F80D89F2EF61D;
+		};
+		43C71D13036235A0E1BB4488 = {
+			isa = XCBuildConfiguration;
+			name = Debug;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BUNDLE_ID).uitests";
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks",);
+				GENERATE_INFOPLIST_FILE = YES;
+				SKIP_INSTALL = YES;
+				TEST_TARGET_NAME = Millionaire;
+			};
+		};
+		EAE2C51531CE5FD70D4C88D7 = {
+			isa = XCBuildConfiguration;
+			name = Release;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = "$(BUNDLE_ID).uitests";
+				LD_RUNPATH_SEARCH_PATHS = ("$(inherited)", "@executable_path/Frameworks", "@loader_path/Frameworks",);
+				GENERATE_INFOPLIST_FILE = YES;
+				SKIP_INSTALL = YES;
+				TEST_TARGET_NAME = Millionaire;
+			};
+		};
+		3F1764650B63BA2675F6ED80 = {
+			isa = XCConfigurationList;
+			buildConfigurations = (43C71D13036235A0E1BB4488, EAE2C51531CE5FD70D4C88D7,);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		BF8BBA699F5CC775A8662549 = {
+			isa = PBXNativeTarget;
+			name = MillionaireUITests;
+			productName = MillionaireUITests;
+			buildConfigurationList = 3F1764650B63BA2675F6ED80;
+			buildPhases = (BB51DB7E23B38F7C9A33A21C, 186822A0B7A9983F01808896, 7B3187D853534B00DE3781BD,);
+			buildRules = ();
+			dependencies = (D5B7CCC8266C4C275442E274,);
+			productReference = 61E97B3944FCED51AD647B1E;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		0A3E27B8CA818264D75C8D81 = {
+			isa = PBXGroup;
+			name = Products;
+			children = (27B7E1D1C9493D62A4869497, F7C839E3F8040D277DA2E70E, 61E97B3944FCED51AD647B1E,);
+			sourceTree = "<group>";
+		};
+		19F479106CE8C3BA8C106518 = {
+			isa = PBXGroup;
+			children = (2B473A24FF54CA7CCE5E2C0A, 1DC7B43F86200C4DCAAA918A, FF833EAA309E8376EB761B1B, 0A3E27B8CA818264D75C8D81,);
+			sourceTree = "<group>";
+		};
+		5667104C1D789661668F969C = {
+			isa = XCBuildConfiguration;
+			name = Debug;
+			buildSettings = {
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				BUNDLE_ID = app.millionaire.arabic;
+				SWIFT_VERSION = 5.0;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				TARGETED_DEVICE_FAMILY = 1;
+				SUPPORTS_MACCATALYST = NO;
+				MARKETING_VERSION = 1.0;
+				CURRENT_PROJECT_VERSION = 1;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				ENABLE_TESTABILITY = YES;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+			};
+		};
+		BE251B8202E082185B522159 = {
+			isa = XCBuildConfiguration;
+			name = Release;
+			buildSettings = {
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				BUNDLE_ID = app.millionaire.arabic;
+				SWIFT_VERSION = 5.0;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				TARGETED_DEVICE_FAMILY = 1;
+				SUPPORTS_MACCATALYST = NO;
+				MARKETING_VERSION = 1.0;
+				CURRENT_PROJECT_VERSION = 1;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				CODE_SIGN_STYLE = Automatic;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited)";
+				ENABLE_TESTABILITY = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+			};
+		};
+		C9E3AFB221AC83063264143C = {
+			isa = XCConfigurationList;
+			buildConfigurations = (5667104C1D789661668F969C, BE251B8202E082185B522159,);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4813494D137E1631BBA301D5 = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					BD57DD118CEA0FD747B5B7DA = {
+						CreatedOnToolsVersion = 16.0;
+					};
+					BDD6EB497752CBD664A0992F = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = BD57DD118CEA0FD747B5B7DA;
+					};
+					BF8BBA699F5CC775A8662549 = {
+						CreatedOnToolsVersion = 16.0;
+						TestTargetID = BD57DD118CEA0FD747B5B7DA;
+					};
+				};
+			};
+			buildConfigurationList = C9E3AFB221AC83063264143C;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = ar;
+			hasScannedForEncodings = 0;
+			knownRegions = (ar, Base,);
+			mainGroup = 19F479106CE8C3BA8C106518;
+			productRefGroup = 0A3E27B8CA818264D75C8D81;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (BD57DD118CEA0FD747B5B7DA, BDD6EB497752CBD664A0992F, BF8BBA699F5CC775A8662549,);
+		};
+	};
+	rootObject = 4813494D137E1631BBA301D5;
+}
