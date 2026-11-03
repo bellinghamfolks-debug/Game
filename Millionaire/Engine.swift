@@ -212,7 +212,22 @@ final class GameVM: ObservableObject {
         let daySeed = UInt64(year * 10_000 + month * 100 + day)
         var g = Seeded(state: mode == .daily ? daySeed : UInt64.random(in: .min ... .max))
         // Reserve unseen alternatives at each difficulty for a question swap.
-        var pools = (1...5).map { difficulty in bank.filter { $0.difficulty == difficulty }.shuffled(using: &g) }
+        var pools = (1...5).map { difficulty -> [Question] in
+            let tier = bank.filter { $0.difficulty == difficulty }
+            var categories = Dictionary(grouping: tier, by: \.category)
+            let names = categories.keys.sorted()
+            for name in names { categories[name]?.shuffle(using: &g) }
+            var active = names
+            var scheduled: [Question] = []
+            while !active.isEmpty {
+                active.shuffle(using: &g)
+                for category in active {
+                    if let next = categories[category]?.popLast() { scheduled.append(next) }
+                }
+                active.removeAll { categories[$0]?.isEmpty != false }
+            }
+            return Array(scheduled.reversed())
+        }
         var draw: [Question] = []
         let target: Int
         switch mode {

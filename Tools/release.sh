@@ -19,5 +19,6 @@ ditto -c -k --norsrc --keepParent "$work/Payload" dist/Millionaire-iOS-Unsigned.
 ditto -c -k --norsrc --keepParent "$app" dist/Millionaire.app.zip
 unzip -tq dist/Millionaire-iOS-Unsigned.ipa
 unzip -Z1 dist/Millionaire-iOS-Unsigned.ipa | grep -Fx 'Payload/Millionaire.app/Millionaire'
+python3 Tools/verify_archive.py dist/Millionaire-iOS-Unsigned.ipa | tee dist/logs/archive.txt
 shasum -a 256 dist/Millionaire-iOS-Unsigned.ipa | tee dist/logs/SHA256.txt
 git archive --format=zip --prefix=Millionaire/ -o dist/Millionaire-source.zip HEAD

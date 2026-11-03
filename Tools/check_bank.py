@@ -9,6 +9,8 @@ def norm(text):
 assert len(bank) >= 1500, f'Expected at least 1500 questions, found {len(bank)}'
 assert len(set(q['id'] for q in bank)) == len(bank)
 assert len(set(norm(q['text']) for q in bank)) == len(bank)
+assert len({q['category'] for q in bank}) >= 11
+assert min(Counter(q['difficulty'] for q in bank).get(i, 0) for i in range(1,6)) >= 15
 for q in bank:
     assert all(isinstance(q[k], str) and q[k].strip() for k in ('id','text','category','explanation','source')), q
     assert len(q['options']) == len({' '.join(o.split()) for o in q['options']}) == 4, q

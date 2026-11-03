@@ -26,6 +26,19 @@ final class EngineTests: XCTestCase {
         vm.advance()
     }
 
+    @MainActor func testFirstThreeClassicQuestionsVisitDifferentCategories() async throws {
+        let fixture = questions().enumerated().map { index, q in
+            Question(id: q.id, text: q.text, options: q.options, correct: q.correct,
+                     difficulty: q.difficulty, category: ["أدب", "علوم", "تاريخ"][index % 3],
+                     explanation: q.explanation, source: q.source)
+        }
+        let vm = try GameVM(questions: fixture)
+        vm.start(.classic)
+        let lookup = Dictionary(uniqueKeysWithValues: fixture.map { ($0.id, $0.category) })
+        let first = try XCTUnwrap(vm.round).deals.prefix(3)
+        XCTAssertEqual(Set(first.compactMap { lookup[$0.id] }).count, 3)
+    }
+
     @MainActor func testMillionAndBalancedSlots() async throws {
         let clock = Clock()
         let vm = try GameVM(questions: questions(), now: { clock.date })

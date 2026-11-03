@@ -3,7 +3,7 @@ on: [push, workflow_dispatch]
 permissions:
   contents: read
 concurrency:
-  group: millionaire-${{ github.ref }}
+  group: millionaire-validated-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   build:
@@ -44,6 +44,11 @@ jobs:
           DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import os,sys,json; print(next(d["udid"] for d in json.load(sys.stdin)["devices"][os.environ["SIM_RUNTIME"]] if d["name"].startswith("iPhone")))')
           xcrun simctl boot "$DEVICE" || xcrun simctl bootstatus "$DEVICE" -b
           xcodebuild -scheme Millionaire -project Millionaire.xcodeproj -configuration Debug -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -maximum-concurrent-test-simulator-destinations 1 -derivedDataPath "$RUNNER_TEMP/MillionaireTests" -resultBundlePath dist/logs/Tests.xcresult test | tee dist/logs/tests.log
+      - name: Summarize the actual test run
+        if: always() && hashFiles('dist/logs/Tests.xcresult/Info.plist') != ''
+        run: |
+          xcrun xcresulttool get test-results summary --path dist/logs/Tests.xcresult > dist/logs/test-summary.json
+          python3 Tools/result_summary.py dist/logs/test-summary.json | tee dist/logs/Test-Results.md >> "$GITHUB_STEP_SUMMARY"
       - name: Upload diagnostics
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
@@ -56,4 +61,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           tag="millionaire-ios-${GITHUB_SHA:0:8}"
-          gh release create "$tag" --target "$GITHUB_SHA" --prerelease --latest=false --title "من سيربح المليون • iPhone" --notes "Unsigned device build. See the Actions run for test results." dist/Millionaire-iOS-Unsigned.ipa dist/Millionaire.app.zip dist/Millionaire-source.zip dist/logs/SHA256.txt
+          gh release create "$tag" --target "$GITHUB_SHA" --prerelease --latest=false --title "من سيربح المليون • iPhone" --notes "Unsigned device build. See the Actions run for test results." dist/Millionaire-iOS-Unsigned.ipa dist/Millionaire.app.zip dist/Millionaire-source.zip dist/logs/SHA256.txt dist/logs/Test-Results.md

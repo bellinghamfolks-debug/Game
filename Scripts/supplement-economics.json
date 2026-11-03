@@ -1,0 +1,197 @@
+[
+ {
+  "id": "studio-eco-01",
+  "text": "عند قياس الناتج المحلي، لماذا لا تُحسب قيمة دقيق المخبز مرة ثانية إلى جانب سعر خبزه؟",
+  "options": [
+   "لتجنّب عدّ القيمة نفسها مرتين",
+   "لأن الدقيق سلعة مستوردة دائمًا",
+   "لأن الخبز لا يباع في الأسواق",
+   "لأن القياس يستثني الغذاء"
+  ],
+  "correct": 0,
+  "difficulty": 3,
+  "explanation": "يحمل سعر الخبز النهائي قيمة الدقيق الداخل في إنتاجه.",
+  "category": "اقتصاد",
+  "source": "https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/gross-domestic-product-gdp"
+ },
+ {
+  "id": "studio-eco-02",
+  "text": "باع نجار طاولة بألف ريال واستخدم مواد وسيطة قيمتها ستمئة. ما القيمة المضافة في هذه المرحلة؟",
+  "options": [
+   "٤٠٠ ريال",
+   "٦٠٠ ريال",
+   "١٬٠٠٠ ريال",
+   "١٬٦٠٠ ريال"
+  ],
+  "correct": 0,
+  "difficulty": 3,
+  "explanation": "القيمة المضافة هي قيمة المخرجات مطروحًا منها المدخلات الوسيطة.",
+  "category": "اقتصاد",
+  "source": "https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/gross-domestic-product-gdp"
+ },
+ {
+  "id": "studio-eco-03",
+  "text": "ارتفعت أسعار كل السلع وبقيت كميات الإنتاج ثابتة. أي مقياس يرتفع نتيجة تغير الأسعار وحدها؟",
+  "options": [
+   "الناتج المحلي الاسمي",
+   "حجم الإنتاج الحقيقي",
+   "عدد العاملين",
+   "عدد المصانع"
+  ],
+  "correct": 0,
+  "difficulty": 3,
+  "explanation": "تُحسب القيمة الاسمية بالأسعار الجارية، فتتأثر بارتفاع الأسعار.",
+  "category": "اقتصاد",
+  "source": "https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/gross-domestic-product-gdp"
+ },
+ {
+  "id": "studio-eco-04",
+  "text": "أي مقياس أنسب لمقارنة حجم الإنتاج المحلي لبلد بين عامين شهد أحدهما تضخمًا مرتفعًا؟",
+  "options": [
+   "الناتج المحلي الحقيقي",
+   "الناتج المحلي بالأسعار الجارية",
+   "إجمالي السكان",
+   "القيمة الاسمية للنقود المتداولة"
+  ],
+  "correct": 0,
+  "difficulty": 2,
+  "explanation": "يساعد استبعاد أثر الأسعار على مقارنة كميات الإنتاج.",
+  "category": "اقتصاد",
+  "source": "https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/gross-domestic-product-gdp"
+ },
+ {
+  "id": "studio-eco-05",
+  "text": "شركة أجنبية تصنع سيارة داخل بلد ما. ما العامل الحاسم لدخول إنتاج السيارة في الناتج المحلي لذلك البلد؟",
+  "options": [
+   "وقوع الإنتاج داخل حدوده",
+   "جنسية المساهمين",
+   "عملة دفع الثمن",
+   "بلد تسجيل العلامة التجارية"
+  ],
+  "correct": 0,
+  "difficulty": 3,
+  "explanation": "يُنسَب الإنتاج المحلي إلى الإقليم الذي جرى فيه.",
+  "category": "اقتصاد",
+  "source": "https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/gross-domestic-product-gdp"
+ },
+ {
+  "id": "studio-eco-06",
+  "text": "في مقارنة دولية، ما الفكرة التي يقوم عليها تعادل القوة الشرائية؟",
+  "options": [
+   "مقارنة تكلفة سلة سلع وخدمات متكافئة",
+   "مساواة عدد سكان البلدين",
+   "مساواة نسب الضرائب",
+   "تثبيت أسعار الأسهم"
+  ],
+  "correct": 0,
+  "difficulty": 4,
+  "explanation": "تُستخدم سلة متكافئة لتقدير ما يمكن لوحدات النقد شراؤه.",
+  "category": "اقتصاد",
+  "source": "https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/gross-domestic-product-gdp"
+ },
+ {
+  "id": "studio-eco-07",
+  "text": "لماذا لا تكفي زيادة نصيب الفرد من الناتج لمعرفة كيف توزّع تحسن الدخل؟",
+  "options": [
+   "لأنه متوسط لا يبيّن التفاوت بين الأفراد",
+   "لأنه يقيس عدد السكان وحده",
+   "لأنه يتجاهل الإنتاج بالكامل",
+   "لأنه يحسب الديون فقط"
+  ],
+  "correct": 0,
+  "difficulty": 3,
+  "explanation": "قد يرتفع المتوسط مع تركز الزيادة لدى جزء من السكان.",
+  "category": "اقتصاد",
+  "source": "https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/gross-domestic-product-gdp"
+ },
+ {
+  "id": "studio-eco-08",
+  "text": "ما المدة التي يمكن أن يشير إليها رقم منشور للناتج المحلي الإجمالي؟",
+  "options": [
+   "ربع سنة أو سنة محددة",
+   "لحظة إغلاق البورصة فقط",
+   "عمر الدولة كاملًا دائمًا",
+   "يوم تأسيس البنك المركزي فقط"
+  ],
+  "correct": 0,
+  "difficulty": 2,
+  "explanation": "الناتج تدفق إنتاج يُقاس خلال فترة معلومة.",
+  "category": "اقتصاد",
+  "source": "https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/gross-domestic-product-gdp"
+ },
+ {
+  "id": "studio-eco-09",
+  "text": "إذا طُرح استهلاك السلع الوسيطة من قيمة الإنتاج في كل منشأة ثم جُمعت النتائج، فما منهج القياس المستخدم؟",
+  "options": [
+   "منهج القيمة المضافة",
+   "منهج إحصاء السكان",
+   "منهج أرصدة الودائع",
+   "منهج حساب المخزون النقدي"
+  ],
+  "correct": 0,
+  "difficulty": 4,
+  "explanation": "يجمع منهج الإنتاج مساهمة كل مرحلة بعد طرح ما تلقّته من مراحل أخرى.",
+  "category": "اقتصاد",
+  "source": "https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/gross-domestic-product-gdp"
+ },
+ {
+  "id": "studio-eco-10",
+  "text": "أي إجراء يُعد من أدوات السياسة المالية للحكومة؟",
+  "options": [
+   "تعديل الإنفاق العام",
+   "تصميم فئات الأوراق النقدية",
+   "تغيير ساعات فتح البورصة",
+   "تغيير رمز العملة"
+  ],
+  "correct": 0,
+  "difficulty": 2,
+  "explanation": "تستخدم السياسة المالية الإنفاق والإيرادات الحكومية للتأثير في الاقتصاد.",
+  "category": "اقتصاد",
+  "source": "https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/fiscal-policy"
+ },
+ {
+  "id": "studio-eco-11",
+  "text": "أي جهة تستخدم عادةً أدوات السياسة النقدية في الاقتصاد الحديث؟",
+  "options": [
+   "البنك المركزي",
+   "إدارة الجمارك",
+   "مكتب الإحصاء السكاني",
+   "وزارة الطرق"
+  ],
+  "correct": 0,
+  "difficulty": 1,
+  "explanation": "يفرّق الاقتصاديون بين إدارة السياسة النقدية ومسؤوليات الحكومة المالية.",
+  "category": "اقتصاد",
+  "source": "https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/fiscal-policy"
+ },
+ {
+  "id": "studio-eco-12",
+  "text": "ما الوصف الأقرب لعجز الموازنة خلال سنة؟",
+  "options": [
+   "زيادة نفقات الحكومة على إيراداتها",
+   "زيادة الإيرادات على النفقات",
+   "ارتفاع قيمة الصادرات على الواردات",
+   "تساوي النفقات والإيرادات"
+  ],
+  "correct": 0,
+  "difficulty": 2,
+  "explanation": "العجز فرق يتعلق بفترة، بينما الدين رصيد متراكم.",
+  "category": "اقتصاد",
+  "source": "https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/fiscal-policy"
+ },
+ {
+  "id": "studio-eco-13",
+  "text": "في فترة ضعف الطلب، أي مثال يمثّل سياسة مالية توسعية؟",
+  "options": [
+   "زيادة الإنفاق الحكومي على مشروعات جاهزة",
+   "تقليص مشتريات الحكومة",
+   "رفع الضرائب دون إنفاق مقابل",
+   "إلغاء إعانات مع ثبات بقية البنود"
+  ],
+  "correct": 0,
+  "difficulty": 3,
+  "explanation": "تضيف المشتريات العامة طلبًا مباشرًا على السلع والخدمات.",
+  "category": "اقتصاد",
+  "source": "https://www.imf.org/en/publications/fandd/issues/series/back-to-basics/fiscal-policy"
+ }
+]
