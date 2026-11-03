@@ -1,5 +1,13 @@
 name: Millionaire iPhone
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches: [millionaire-ios]
+  workflow_dispatch:
+    inputs:
+      publish_release:
+        description: "Publish an optional GitHub Release (requires repository release permission)"
+        type: boolean
+        default: false
 permissions:
   contents: read
 concurrency:
@@ -56,7 +64,7 @@ jobs:
           name: build-and-test-evidence
           path: dist/logs
       - name: Publish signed-off test build as downloadable files
-        if: success() && github.ref == 'refs/heads/millionaire-ios'
+        if: success() && github.event_name == 'workflow_dispatch' && inputs.publish_release && github.ref == 'refs/heads/millionaire-ios'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
