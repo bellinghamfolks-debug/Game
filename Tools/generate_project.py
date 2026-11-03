@@ -74,7 +74,7 @@ def project_graph():
         if i == 0:
             children.append(file('Info.plist', 'text.plist.xml'))
             resources = [file('Resources/questions.json', 'text.json'),
-                         file('Resources/Audio', 'folder'), file('Assets.xcassets', 'folder.assetcatalog')]
+                         file('Resources/ThirdPartyNotices.txt', 'text'), file('Resources/Audio', 'folder'), file('Assets.xcassets', 'folder.assetcatalog')]
             resources.extend(file(pack.relative_to(path).as_posix(), 'text.json')
                              for pack in sorted((path/'Resources').glob('questionpack-*.json')))
             children.extend(resources)

@@ -188,7 +188,7 @@ final class GameVM: ObservableObject {
             round = s.round
             tick()
             if round?.phase == .locked { scheduleReveal() }
-        } catch { round = nil; error = "تعذّر استعادة الجولة المحفوظة. يمكنك بدء جولة جديدة." }
+        } catch { round = nil; self.error = "تعذّر استعادة الجولة المحفوظة. يمكنك بدء جولة جديدة." }
     }
 
     private func save() {
@@ -206,7 +206,10 @@ final class GameVM: ObservableObject {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = .current
         let parts = calendar.dateComponents([.year, .month, .day], from: now())
-        let daySeed = UInt64((parts.year ?? 0) * 10_000 + (parts.month ?? 0) * 100 + (parts.day ?? 0))
+        let year = parts.year ?? 0
+        let month = parts.month ?? 0
+        let day = parts.day ?? 0
+        let daySeed = UInt64(year * 10_000 + month * 100 + day)
         var g = Seeded(state: mode == .daily ? daySeed : UInt64.random(in: .min ... .max))
         // Reserve unseen alternatives at each difficulty for a question swap.
         var pools = (1...5).map { difficulty in bank.filter { $0.difficulty == difficulty }.shuffled(using: &g) }
@@ -226,7 +229,11 @@ final class GameVM: ObservableObject {
             case .quick,.endless: tier = Int.random(in: 0..<5, using: &g)
             default: tier = i % 5
             }
-            let tiers = pools.indices.sorted { abs($0-tier) == abs($1-tier) ? $0 < $1 : abs($0-tier) < abs($1-tier) }
+            let tiers = pools.indices.sorted { (left: Int, right: Int) -> Bool in
+                let l = abs(left - tier)
+                let r = abs(right - tier)
+                return l == r ? left < right : l < r
+            }
             guard let t = tiers.first(where: { pools[$0].count > 1 }) ?? tiers.first(where: { !pools[$0].isEmpty }) else { break }
             draw.append(pools[t].removeLast())
         }

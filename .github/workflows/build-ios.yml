@@ -8,6 +8,8 @@ concurrency:
 jobs:
   build:
     runs-on: macos-15
+    permissions:
+      contents: write
     timeout-minutes: 55
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
@@ -21,13 +23,6 @@ jobs:
           python3 Tools/check_bank.py | tee dist/logs/questions.txt
       - name: Build and verify unsigned iPhone release
         run: bash Tools/release.sh
-      - name: Test gameplay and interface on iPhone
-        run: |
-          set -euo pipefail
-          export SIM_RUNTIME=com.apple.CoreSimulator.SimRuntime.iOS-$(xcrun --sdk iphonesimulator --show-sdk-version | tr . -)
-          DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import os,sys,json; print(next(d["udid"] for d in json.load(sys.stdin)["devices"][os.environ["SIM_RUNTIME"]] if d["name"].startswith("iPhone")))')
-          xcrun simctl boot "$DEVICE" || xcrun simctl bootstatus "$DEVICE" -b
-          xcodebuild -scheme Millionaire -project Millionaire.xcodeproj -configuration Debug -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -maximum-concurrent-test-simulator-destinations 1 -derivedDataPath "$RUNNER_TEMP/MillionaireTests" -resultBundlePath dist/logs/Tests.xcresult test | tee dist/logs/tests.log
       - name: Upload verified release
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
@@ -42,9 +37,23 @@ jobs:
             dist/Millionaire.app.zip
             dist/Millionaire-source.zip
           if-no-files-found: error
+      - name: Test gameplay and interface on iPhone
+        run: |
+          set -euo pipefail
+          export SIM_RUNTIME=com.apple.CoreSimulator.SimRuntime.iOS-$(xcrun --sdk iphonesimulator --show-sdk-version | tr . -)
+          DEVICE=$(xcrun simctl list devices available -j | python3 -c 'import os,sys,json; print(next(d["udid"] for d in json.load(sys.stdin)["devices"][os.environ["SIM_RUNTIME"]] if d["name"].startswith("iPhone")))')
+          xcrun simctl boot "$DEVICE" || xcrun simctl bootstatus "$DEVICE" -b
+          xcodebuild -scheme Millionaire -project Millionaire.xcodeproj -configuration Debug -destination "platform=iOS Simulator,id=$DEVICE" -parallel-testing-enabled NO -maximum-concurrent-test-simulator-destinations 1 -derivedDataPath "$RUNNER_TEMP/MillionaireTests" -resultBundlePath dist/logs/Tests.xcresult test | tee dist/logs/tests.log
       - name: Upload diagnostics
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: build-and-test-evidence
           path: dist/logs
+      - name: Publish signed-off test build as downloadable files
+        if: success() && github.ref == 'refs/heads/millionaire-ios'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="millionaire-ios-${GITHUB_SHA:0:8}"
+          gh release create "$tag" --target "$GITHUB_SHA" --prerelease --latest=false --title "من سيربح المليون • iPhone" --notes "Unsigned device build. See the Actions run for test results." dist/Millionaire-iOS-Unsigned.ipa dist/Millionaire.app.zip dist/Millionaire-source.zip dist/logs/SHA256.txt
