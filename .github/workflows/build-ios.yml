@@ -1,0 +1,9 @@
+name: iPhone build environment
+on: [push, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  preflight:
+    runs-on: macos-15
+    steps:
+      - run: xcodebuild -version && xcodebuild -showsdks && xcrun simctl list devices available
