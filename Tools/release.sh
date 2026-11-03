@@ -7,7 +7,7 @@ trap 'rm -rf "$work"' EXIT
 xcodebuild -project Millionaire.xcodeproj -scheme Millionaire -configuration Release -sdk iphoneos -destination 'generic/platform=iOS' -derivedDataPath "$work/Derived" BUNDLE_ID="${BUNDLE_ID:-app.millionaire.arabic}" CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" build | tee dist/logs/device-build.log
 app="$work/Derived/Build/Products/Release-iphoneos/Millionaire.app"
 test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleSupportedPlatforms:0' "$app/Info.plist")" = iPhoneOS
-xcrun lipo -verify_arch arm64 "$app/Millionaire"
+xcrun lipo "$app/Millionaire" -verify_arch arm64
 xcrun vtool -show-build "$app/Millionaire" | tee dist/logs/macho.txt
 grep -Eq 'platform IOS$' dist/logs/macho.txt
 test ! -e "$app/embedded.mobileprovision"
