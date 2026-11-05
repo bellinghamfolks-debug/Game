@@ -1,5 +1,5 @@
 {
-  "checks": "ffprobe + complete ffmpeg decode; PIL verify of RGB 1024x1024 icon",
+  "checks": "ffprobe + full ffmpeg decode; non-silent stereo PCM; unique encoded SHA-256; PIL verify of icon",
   "columns": [
     "asset",
     "codec",
@@ -15,15 +15,7 @@
       2,
       "32000",
       "3.200000",
-      "48399d540b79c5241c17545aa6a2fd7ad0e3be0c917f7c4a5aa3a06747de957c"
-    ],
-    [
-      "calm.m4a",
-      "aac",
-      2,
-      "32000",
-      "26.667000",
-      "1f0c1282b94155e33d0e84b4d78cb5428e178aebf521f4d0f975d8a3ff497b43"
+      "e6521a9c72dbb522344aced204004d290941d0d230398e26a79a46a6e8651050"
     ],
     [
       "correct.m4a",
@@ -31,7 +23,15 @@
       2,
       "32000",
       "1.280000",
-      "bce6f93ef8d1a8e817076480cf4d19ec81a3b5a5e83a62d2b289bf70840ddb1e"
+      "f64ded49609c55c42dd116d359158cdea3158f4d2cc96e40b130cfdb63d0bcd3"
+    ],
+    [
+      "countdown.m4a",
+      "aac",
+      2,
+      "32000",
+      "0.200000",
+      "0c35556f2dabd1eaaa1d3a59e181c51eaea301ffa29f2794c2b4f54958f5e3fd"
     ],
     [
       "help.m4a",
@@ -39,15 +39,15 @@
       2,
       "32000",
       "1.160000",
-      "a58778b672b46f45f783db077b6a16240600062298ab1a89b1d0d56708ce907e"
+      "a0b9f4c0bc254961aa0451334838de44c507401284d322fd98c96556e3d5f3d7"
     ],
     [
       "intro.m4a",
       "aac",
       2,
       "32000",
-      "8.889000",
-      "8a2b72d65077adeae3afe1cbe8e81d50ade277ed08f7a6d0bc156ab12a41b27c"
+      "9.412000",
+      "60e398e4713a0a8c0e878b40c4b2e138805bc73d88680073b7d9bea24f190abb"
     ],
     [
       "lock.m4a",
@@ -55,23 +55,23 @@
       2,
       "32000",
       "1.190000",
-      "83f2923fd104621284c5b0a1ac0bb23a49908aa2cf8935c392fc88c9ad2fafa4"
+      "12309d3b33c92f5c7af10d858f1dd88fe998cd15c154ec2e7e3143fbd10668f0"
     ],
     [
       "menu.m4a",
       "aac",
       2,
       "32000",
-      "23.415000",
-      "0a2af0d058e65633e111ebb738ca8754768907e3690cbab751010551c6c7407a"
+      "21.819000",
+      "9c15e33790bd64e4c46f2b957a417f813a5a5381fd9f214e49765e71afcf65a5"
     ],
     [
       "milestone.m4a",
       "aac",
       2,
       "32000",
-      "1.760000",
-      "adc0708c2af0298c3a0a2b0d48e7c100a4d171a352536cc2f76c83e36ff64395"
+      "3.840000",
+      "1ece3132f43624d64e4485c238a86bb4352e9b4d5d7145707dd7962090d8481a"
     ],
     [
       "question.m4a",
@@ -79,7 +79,7 @@
       2,
       "32000",
       "1.130000",
-      "8dcf476cbfe7a542004c6ca1a4a360722f6ee2abd3655b0eac3a164a814df73f"
+      "6b85d09898a9e2fe046fce698e1e01ff9d2188ff8dc11723415dda6027bf7975"
     ],
     [
       "select.m4a",
@@ -87,31 +87,63 @@
       2,
       "32000",
       "0.910000",
-      "7708dd61e831aebeb72234e3d38e4c83c6e74282bee7cac0396e533bb59d8bb2"
+      "03583b5bde27a2e05433c4a180ad4ec50cf4df65cd34ca700cf286142eacabf1"
+    ],
+    [
+      "stage1.m4a",
+      "aac",
+      2,
+      "32000",
+      "27.693000",
+      "569a1da6242d85c0c855cc954d66d9a46ff67dfd819f07daf03ab823f0cc0c10"
+    ],
+    [
+      "stage2.m4a",
+      "aac",
+      2,
+      "32000",
+      "24.828000",
+      "2d5176fef07843c3e5b0ab9802ba3c2b5ea71a63584293c55775913f5f190c07"
+    ],
+    [
+      "stage3.m4a",
+      "aac",
+      2,
+      "32000",
+      "26.182000",
+      "f1300fea03c5ff31b34f7d4a88719e2b833a004e7e0ab25e6c46e6a06ab3632a"
+    ],
+    [
+      "stage4.m4a",
+      "aac",
+      2,
+      "32000",
+      "28.000000",
+      "1eafc00f18eca3363b701e1a916d8d33a21191bffb3b013d5c317052727c0457"
+    ],
+    [
+      "stage5.m4a",
+      "aac",
+      2,
+      "32000",
+      "37.895000",
+      "ba48a54dd869eba8909ae4819a3e31bf390f2451c65a16b64643b7b3bef590bb"
     ],
     [
       "suspense.m4a",
       "aac",
       2,
       "32000",
-      "8.276000",
-      "abb6a244cc4958306a62fa20cb6085f8e4ced69fabfa425a2d14f38c553ee829"
-    ],
-    [
-      "tense.m4a",
-      "aac",
-      2,
-      "32000",
-      "18.114000",
-      "99e45a6a90927b9fb2d5b66bb603440d7947d016dd8b9282b8a184fdaf1f1602"
+      "10.213000",
+      "10e2ae0e785d321c2e404f93e9e70c13b014cfad9c9164a9faadbc3d0e0433e0"
     ],
     [
       "victory.m4a",
       "aac",
       2,
       "32000",
-      "15.239000",
-      "6dc2ee29719526b51cf33b844a26e77a4729bdb13fa5615157743a4f3049528f"
+      "15.868000",
+      "5e4d8bc451ba850af344c5b63e48a0fc0a3cf999d014875f20f4b04fcb359ea1"
     ],
     [
       "win.m4a",
@@ -119,7 +151,7 @@
       2,
       "32000",
       "1.850000",
-      "95cabebe0612089be549e498c0d20592dd1af03a14d4d498720bfa071380cf05"
+      "8af1573bef2580e58ba663c6dd9837038a8cff1543542a62552e3a4306c48164"
     ],
     [
       "wrong.m4a",
@@ -127,7 +159,7 @@
       2,
       "32000",
       "1.460000",
-      "73eacf76535afb8b626093173e5cf382ad9d3c09b162b09a8045fb69dbe308ee"
+      "a7bdcef5239867d82e16dbaafb6f9254b3e03ff7cf331fd4fe375b5287e82c70"
     ]
   ]
 }

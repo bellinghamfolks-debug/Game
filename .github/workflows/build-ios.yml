@@ -56,6 +56,7 @@ jobs:
         if: always() && hashFiles('dist/logs/Tests.xcresult/Info.plist') != ''
         run: |
           xcrun xcresulttool get test-results summary --path dist/logs/Tests.xcresult > dist/logs/test-summary.json
+          xcrun xcresulttool export attachments --path dist/logs/Tests.xcresult --output-path dist/logs/attachments
           python3 Tools/result_summary.py dist/logs/test-summary.json | tee dist/logs/Test-Results.md >> "$GITHUB_STEP_SUMMARY"
       - name: Upload diagnostics
         if: always()

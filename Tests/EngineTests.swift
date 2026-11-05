@@ -204,4 +204,100 @@ final class EngineTests: XCTestCase {
         recovered.start(.training)
         XCTAssertNotNil(recovered.question)
     }
+    @MainActor func testTimeoutRespectsPrizeFloorAndCannotBeDodgedBySwapOrWithdrawal() async throws {
+        let clock = Clock()
+        let vm = try GameVM(questions: questions(), now: { clock.date })
+        vm.start(.classic)
+        for _ in 0..<5 { try play(vm, clock: clock, correct: true) }
+        let deadline = try XCTUnwrap(vm.round?.questionDeadline)
+        clock.step(14)
+        vm.use(.swap)
+        XCTAssertEqual(vm.round?.questionDeadline, deadline)
+        vm.choose(try XCTUnwrap(vm.question?.correct))
+        clock.date = deadline
+        vm.withdraw()
+        vm.confirm()
+        XCTAssertEqual(vm.round?.phase, .finished)
+        XCTAssertEqual(vm.round?.timedOut, true)
+        XCTAssertEqual(vm.history.last?.payout, 1_000)
+        XCTAssertEqual(vm.history.last?.answered, 6)
+        XCTAssertEqual(vm.history.last?.correct, 5)
+        XCTAssertEqual(vm.reviewQuestions.first?.id, vm.question?.id)
+        XCTAssertFalse(vm.timingActive)
+    }
+
+    @MainActor func testConfirmationBeforeBellSurvivesRevealDelay() async throws {
+        let clock = Clock()
+        let vm = try GameVM(questions: questions(), now: { clock.date })
+        vm.start(.expert)
+        let deadline = try XCTUnwrap(vm.round?.questionDeadline)
+        clock.date = deadline.addingTimeInterval(-0.05)
+        vm.choose(try XCTUnwrap(vm.question?.correct))
+        vm.confirm()
+        clock.step(60)
+        vm.tick()
+        XCTAssertEqual(vm.round?.phase, .revealed)
+        XCTAssertEqual(vm.round?.correctCount, 1)
+        XCTAssertFalse(vm.timingActive)
+        vm.advance()
+        XCTAssertTrue(vm.timingActive)
+        XCTAssertEqual(vm.questionSecondsLeft, Mode.expert.questionTimeLimit)
+    }
+
+    @MainActor func testRestoredTimedOutDailyAndTrainingRevealUntilPlayerAdvances() async throws {
+        for mode in [Mode.daily,.training] {
+            let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            defer { try? FileManager.default.removeItem(at: dir) }
+            let file = dir.appendingPathComponent("state")
+            let clock = Clock()
+            let vm = try GameVM(questions: questions(), store: file, now: { clock.date })
+            vm.start(mode)
+            let id = try XCTUnwrap(vm.question?.id)
+            vm.toggleFavorite(id)
+            clock.step(300)
+            let recovered = try GameVM(questions: questions(), store: file, now: { clock.date })
+            XCTAssertEqual(recovered.round?.phase,.revealed)
+            XCTAssertEqual(recovered.round?.timedOut,true)
+            XCTAssertNil(recovered.round?.selected)
+            XCTAssertEqual(recovered.question?.explanation,"شرح")
+            let again = try GameVM(questions: questions(), store: file, now: { clock.date })
+            XCTAssertEqual(again.round?.answered, 1)
+            XCTAssertEqual(again.favoriteQuestions.map(\.id), [id])
+            XCTAssertEqual(again.reviewQuestions.map(\.id), [id])
+            again.advance()
+            XCTAssertEqual(again.round?.index, 1)
+            XCTAssertEqual(again.round?.phase,.asking)
+            XCTAssertEqual(again.questionSecondsLeft, mode.questionTimeLimit)
+            again.toggleFavorite(id)
+            XCTAssertTrue(again.favoriteQuestions.isEmpty)
+        }
+    }
+
+    @MainActor func testLegacyStateGetsOneDeadlineAndSeenPreferencePersists() async throws {
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let file = dir.appendingPathComponent("state")
+        let clock = Clock()
+        let data = questions()
+        let vm = try GameVM(questions: data, store: file, now: { clock.date })
+        vm.start(.classic)
+        let original = try XCTUnwrap(vm.question?.id)
+        var json = try XCTUnwrap(JSONSerialization.jsonObject(with: Data(contentsOf: file)) as? [String:Any])
+        var legacy = try XCTUnwrap(json["round"] as? [String:Any])
+        legacy.removeValue(forKey:"questionDeadline")
+        json["round"] = legacy
+        for key in ["seen","favorites","missed"] { json.removeValue(forKey:key) }
+        try JSONSerialization.data(withJSONObject:json).write(to:file)
+        let restored = try GameVM(questions:data,store:file,now:{clock.date})
+        XCTAssertEqual(restored.question?.id,original)
+        XCTAssertEqual(restored.questionSecondsLeft,30)
+        clock.step(5)
+        let reopened = try GameVM(questions:data,store:file,now:{clock.date})
+        XCTAssertEqual(reopened.questionSecondsLeft,25)
+        var shown = Set([original])
+        for _ in 0..<12 {
+            reopened.start(.classic)
+            XCTAssertTrue(shown.insert(try XCTUnwrap(reopened.question?.id)).inserted)
+        }
+    }
 }

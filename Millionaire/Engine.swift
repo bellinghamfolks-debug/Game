@@ -31,6 +31,14 @@ enum Mode: String, CaseIterable, Codable, Identifiable {
         case .endless: return "التحدي المتواصل"
         }
     }
+    var questionTimeLimit: Int {
+        switch self {
+        case .quick: return 60
+        case .expert: return 20
+        case .training: return 45
+        case .classic, .daily, .endless: return 30
+        }
+    }
     var ladder: Bool { self == .classic || self == .expert }
 }
 
@@ -70,6 +78,8 @@ struct Round: Codable, Identifiable {
     var answered = 0
     var earned = 0
     var deadline: Date?
+    var questionDeadline: Date?
+    var timedOut: Bool?
     var outcome: String?
     var payout = 0
     var revealAt: Date?
@@ -89,6 +99,9 @@ struct ResultRecord: Codable, Identifiable {
 private struct Snapshot: Codable {
     let round: Round?
     let history: [ResultRecord]
+    let seen: Set<String>?
+    let favorites: [String]?
+    let missed: [String]?
 }
 
 private struct Seeded: RandomNumberGenerator {
@@ -109,6 +122,10 @@ final class GameVM: ObservableObject {
     @Published private(set) var round: Round?
     @Published private(set) var history: [ResultRecord] = []
     @Published private(set) var secondsLeft = 0
+    @Published private(set) var questionSecondsLeft = 0
+    @Published private(set) var favoriteIDs: [String] = []
+    @Published private(set) var missedIDs: [String] = []
+    private var seen: Set<String> = []
     @Published var error: String?
     private var lookup: [String:Question] = [:]
     private var revealTask: Task<Void, Never>?
@@ -119,6 +136,36 @@ final class GameVM: ObservableObject {
         guard let r = round, r.deals.indices.contains(r.index) else { return nil }
         let d = r.deals[r.index]
         return lookup[d.id]?.arranged(d.order)
+    }
+    private func timeLimit(for mode: Mode) -> Int {
+        #if DEBUG
+        let args = ProcessInfo.processInfo.arguments
+        if args.contains("-ui-testing"), mode != .quick {
+            return args.contains("-deadline-test") ? 3 : 300
+        }
+        #endif
+        return mode.questionTimeLimit
+    }
+    var questionTimeLimit: Int { round.map { timeLimit(for: $0.mode) } ?? 0 }
+    var timingActive: Bool {
+        guard let r = round else { return false }
+        return r.mode == .quick ? r.phase != .finished : r.phase == .asking
+    }
+    var favoriteQuestions: [Question] { favoriteIDs.compactMap { lookup[$0] } }
+    var reviewQuestions: [Question] { missedIDs.compactMap { lookup[$0] } }
+    func isFavorite(_ id: String) -> Bool { favoriteIDs.contains(id) }
+    func toggleFavorite(_ id: String) {
+        guard lookup[id] != nil else { return }
+        if isFavorite(id) { favoriteIDs.removeAll { $0 == id } }
+        else { favoriteIDs.insert(id, at: 0) }
+        save()
+    }
+    func bestResult(for mode: Mode) -> ResultRecord? {
+        history.filter { $0.mode == mode }.max { a,b in
+            if mode.ladder && a.payout != b.payout { return a.payout < b.payout }
+            if a.correct != b.correct { return a.correct < b.correct }
+            return a.date < b.date
+        }
     }
     var level: Int { 1 + history.reduce(0) { $0 + $1.correct } / 15 }
     var badges: [String] {
@@ -171,12 +218,16 @@ final class GameVM: ObservableObject {
             guard s.history.allSatisfy({ (0...bank.count).contains($0.correct) && $0.answered >= $0.correct &&
                 $0.payout >= 0 && $0.payout <= 1_000_000 }) else { throw CocoaError(.fileReadCorruptFile) }
             history = s.history
+            seen = (s.seen ?? []).intersection(lookup.keys)
+            favoriteIDs = (s.favorites ?? []).filter { lookup[$0] != nil }
+            missedIDs = (s.missed ?? []).filter { lookup[$0] != nil }
             if let r = s.round {
                 guard r.deals.indices.contains(r.index), r.deals.allSatisfy({
                     lookup[$0.id] != nil && $0.order.sorted() == [0,1,2,3]
                 }), Set(r.deals.map(\.id)).count == r.total,
                 r.selected.map({ (0..<4).contains($0) }) ?? true,
-                (r.phase != .locked && r.phase != .revealed) || r.selected != nil,
+                r.phase != .locked || r.selected != nil,
+                r.phase != .revealed || r.selected != nil || r.timedOut == true,
                 !r.mode.ladder || r.total == 15,
                 (0...r.total).contains(r.answered), (0...r.answered).contains(r.correctCount),
                 r.phase != .locked || r.revealAt != nil,
@@ -186,6 +237,17 @@ final class GameVM: ObservableObject {
                 else { throw CocoaError(.fileReadCorruptFile) }
             }
             round = s.round
+            if let r = round {
+                // Older saves recorded dealt IDs, but lacked a per-question deadline.
+                if s.seen == nil {
+                    seen.formUnion(r.deals.prefix(r.index + 1).map(\.id))
+                    seen.formUnion(r.replaced)
+                }
+                if r.phase == .asking && r.mode != .quick && r.questionDeadline == nil {
+                    round?.questionDeadline = now().addingTimeInterval(Double(timeLimit(for: r.mode)))
+                    save()
+                }
+            }
             tick()
             if round?.phase == .locked { scheduleReveal() }
         } catch { round = nil; self.error = "تعذّر استعادة الجولة المحفوظة. يمكنك بدء جولة جديدة." }
@@ -195,7 +257,7 @@ final class GameVM: ObservableObject {
         guard let store else { return }
         do {
             try FileManager.default.createDirectory(at: store.deletingLastPathComponent(), withIntermediateDirectories: true)
-            let data = try JSONEncoder().encode(Snapshot(round: round, history: history))
+            let data = try JSONEncoder().encode(Snapshot(round: round, history: history, seen: seen, favorites: favoriteIDs, missed: missedIDs))
             try data.write(to: store, options: .atomic)
         } catch { self.error = "تعذّر حفظ تقدّم الجولة." }
     }
@@ -225,6 +287,11 @@ final class GameVM: ObservableObject {
                     if let next = categories[category]?.popLast() { scheduled.append(next) }
                 }
                 active.removeAll { categories[$0]?.isEmpty != false }
+            }
+            // Daily competitors always receive the same draw. For other modes, keep
+            // the category rotation while preferring questions this player has not seen.
+            if mode != .daily {
+                scheduled = scheduled.filter { !seen.contains($0.id) } + scheduled.filter { seen.contains($0.id) }
             }
             return Array(scheduled.reversed())
         }
@@ -258,9 +325,31 @@ final class GameVM: ObservableObject {
         slots = (0..<draw.count).map { slots[$0 % 4] }.shuffled(using: &g)
         let deals = draw.enumerated().map { i,q in Self.deal(q, at: slots[i], using: &g) }
         round = Round(id: UUID(), mode: mode, deals: deals, deadline: mode == .quick ? now().addingTimeInterval(60) : nil)
+        beginQuestion()
         error = nil
         tick()
         save()
+    }
+
+    private func beginQuestion() {
+        guard let r = round else { return }
+        seen.insert(r.deals[r.index].id)
+        round?.timedOut = nil
+        if r.mode != .quick {
+            round?.questionDeadline = now().addingTimeInterval(Double(timeLimit(for: r.mode)))
+            questionSecondsLeft = timeLimit(for: r.mode)
+        }
+    }
+
+    private func markMissed(_ id: String) {
+        missedIDs.removeAll { $0 == id }
+        missedIDs.insert(id, at: 0)
+    }
+
+    private func safetyPayout(_ r: Round) -> Int {
+        guard r.mode.ladder else { return 0 }
+        if r.correctCount >= 10 { return 32_000 }
+        return r.correctCount >= 5 ? 1_000 : 0
     }
 
     private static func deal<R: RandomNumberGenerator>(_ q: Question, at slot: Int, using g: inout R) -> Deal {
@@ -281,6 +370,7 @@ final class GameVM: ObservableObject {
         tick()
         guard var r = round, r.phase == .asking, r.selected != nil else { return }
         r.phase = .locked
+        r.questionDeadline = nil
         r.revealAt = now().addingTimeInterval(r.mode == .quick ? 0.35 : 1.4)
         round = r
         save()
@@ -306,6 +396,8 @@ final class GameVM: ObservableObject {
         if r.selected == q.correct {
             r.correctCount += 1
             if r.mode.ladder { r.earned = Self.prizes[r.index] }
+        } else {
+            markMissed(q.id)
         }
         round = r
         save()
@@ -315,8 +407,7 @@ final class GameVM: ObservableObject {
         tick()
         guard var r = round, r.phase == .revealed, let q = question else { return }
         if r.selected != q.correct && (r.mode.ladder || r.mode == .endless) {
-            let floor = r.mode.ladder ? (r.correctCount >= 10 ? 32000 : r.correctCount >= 5 ? 1000 : 0) : 0
-            finish("إجابة غير صحيحة", payout: floor)
+            finish("إجابة غير صحيحة", payout: safetyPayout(r))
         } else if r.index + 1 == r.total {
             finish(r.mode.ladder ? "فزت بالمليون!" : "اكتمل التحدي", payout: r.earned)
         } else {
@@ -327,6 +418,7 @@ final class GameVM: ObservableObject {
             r.votes = nil
             r.hint = nil
             round = r
+            beginQuestion()
             save()
         }
     }
@@ -340,13 +432,41 @@ final class GameVM: ObservableObject {
     func tick() {
         guard let r = round, r.phase != .finished else { return }
         if r.phase == .locked, let at = r.revealAt, at <= now() { reveal() }
-        guard let deadline = r.deadline else { if secondsLeft != 0 { secondsLeft = 0 }; return }
-        let left = max(0, Int(ceil(deadline.timeIntervalSince(now()))))
-        if secondsLeft != left { secondsLeft = left }
-        if left == 0 {
-            // A choice confirmed before the bell still counts.
-            if round?.phase == .locked { reveal() }
-            finish("انتهى الوقت", payout: 0)
+        if r.mode == .quick, let deadline = r.deadline {
+            let left = remaining(until: deadline)
+            if secondsLeft != left { secondsLeft = left }
+            if questionSecondsLeft != left { questionSecondsLeft = left }
+            if left == 0 {
+                // A choice confirmed before the bell still counts.
+                if round?.phase == .locked { reveal() }
+                finish("انتهى الوقت", payout: 0)
+            }
+        } else {
+            if secondsLeft != 0 { secondsLeft = 0 }
+            guard r.phase == .asking, let deadline = r.questionDeadline else { return }
+            let left = remaining(until: deadline)
+            if questionSecondsLeft != left { questionSecondsLeft = left }
+            if left == 0 { expireQuestion() }
+        }
+    }
+
+    private func remaining(until deadline: Date) -> Int {
+        Int(max(0, min(Double(questionTimeLimit), ceil(deadline.timeIntervalSince(now())))))
+    }
+
+    private func expireQuestion() {
+        guard var r = round, r.phase == .asking else { return }
+        markMissed(r.deals[r.index].id)
+        r.selected = nil
+        r.answered += 1
+        r.timedOut = true
+        r.questionDeadline = nil
+        r.phase = .revealed
+        round = r
+        if r.mode.ladder || r.mode == .endless {
+            finish("انتهى وقت السؤال", payout: safetyPayout(r))
+        } else {
+            save()
         }
     }
 
@@ -354,6 +474,7 @@ final class GameVM: ObservableObject {
         guard var r = round, r.phase != .finished else { return }
         revealTask?.cancel()
         r.phase = .finished
+        r.questionDeadline = nil
         r.outcome = outcome
         r.payout = payout
         history.append(ResultRecord(id: r.id, mode: r.mode, date: now(), correct: r.correctCount,
@@ -389,10 +510,12 @@ final class GameVM: ObservableObject {
             r.hint = "صديقك يرجّح «" + q.options[guess] + "» بثقة " + String(confidence) + "٪."
         case .swap:
             let excluded = Set(r.deals.map(\.id) + r.replaced)
-            guard let replacement = bank.filter({ $0.difficulty == q.difficulty && !excluded.contains($0.id) }).randomElement() else {
+            let candidates = bank.filter { $0.difficulty == q.difficulty && !excluded.contains($0.id) }
+            guard let replacement = candidates.filter({ !seen.contains($0.id) }).randomElement() ?? candidates.randomElement() else {
                 error = "لا يتوفر سؤال بديل من المستوى نفسه."; return
             }
             var gen = SystemRandomNumberGenerator()
+            seen.insert(replacement.id)
             r.replaced.append(q.id)
             r.deals[r.index] = Self.deal(replacement, at: Int.random(in: 0..<4), using: &gen)
             r.selected = nil

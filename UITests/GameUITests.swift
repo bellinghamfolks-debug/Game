@@ -3,11 +3,19 @@ import XCTest
 final class GameUITests: XCTestCase {
     private var app: XCUIApplication!
 
-    @MainActor private func launch() {
+    @MainActor private func launch(deadlineTest: Bool = false) {
         continueAfterFailure = false
         app = XCUIApplication()
+        app.launchArguments = deadlineTest ? ["-ui-testing", "-deadline-test"] : ["-ui-testing"]
         app.launch()
         XCTAssertTrue(app.buttons["start"].waitForExistence(timeout: 10))
+    }
+
+    @MainActor private func attachScreen(_ name: String) {
+        let attachment = XCTAttachment(screenshot: app.screenshot())
+        attachment.name = name
+        attachment.lifetime = .keepAlways
+        add(attachment)
     }
 
     @MainActor private func tap(_ e: XCUIElement, file: StaticString = #filePath, line: UInt = #line) {
@@ -19,17 +27,19 @@ final class GameUITests: XCTestCase {
         XCTFail("Control could not be reached: " + e.description, file:file,line:line)
     }
 
-    @MainActor private func openRound(_ mode:String) {
+    @MainActor private func openRound(_ mode:String, waitForQuestion: Bool = true) {
         tap(app.buttons["start"])
         tap(app.buttons["mode." + mode])
         let replace = app.alerts.buttons["بدء جولة بديلة"]
         if replace.waitForExistence(timeout:1) {replace.tap()}
-        XCTAssertTrue(app.staticTexts["question"].waitForExistence(timeout:5))
+        if waitForQuestion { XCTAssertTrue(app.staticTexts["question"].waitForExistence(timeout:5)) }
     }
 
     @MainActor func testClassicLadderSaveRestoreHelpAndWithdrawal() {
         launch()
+        attachScreen("Home")
         openRound("classic")
+        attachScreen("Game")
         let question = app.staticTexts["question"].label
         tap(app.buttons["ladder"])
         XCTAssertTrue(app.staticTexts["سلم الجوائز"].waitForExistence(timeout:4))
@@ -52,16 +62,31 @@ final class GameUITests: XCTestCase {
     @MainActor func testTrainingConfirmsAndReveals() {
         launch()
         openRound("training")
+        let question = app.staticTexts["question"].label
+        let bookmark = app.buttons["bookmarkQuestion"]
+        if bookmark.label != "إزالة من المفضلة" { tap(bookmark) }
         tap(app.buttons["answer.0"])
         tap(app.buttons["confirm"])
         XCTAssertTrue(app.buttons["advance"].waitForExistence(timeout:7))
         tap(app.buttons["advance"])
         XCTAssertTrue(app.buttons["answer.1"].isEnabled)
+        tap(app.buttons["home"])
+        tap(app.buttons["notebook"])
+        XCTAssertTrue(app.staticTexts[question].waitForExistence(timeout: 5))
+    }
+
+    @MainActor func testTimeLimitEndsClassicRound() {
+        launch(deadlineTest: true)
+        openRound("classic", waitForQuestion: false)
+        XCTAssertTrue(app.buttons["newRound"].waitForExistence(timeout: 15))
+        XCTAssertTrue(app.staticTexts["انتهى وقت السؤال"].exists)
+        XCTAssertFalse(app.buttons["confirm"].exists)
     }
 
     @MainActor func testControlRoomGuideAndStats() {
         launch()
         tap(app.buttons["settings"])
+        XCTAssertTrue(app.switches["announcerToggle"].exists)
         let music = app.switches["musicToggle"]
         let original = music.value as? String
         tap(music)
