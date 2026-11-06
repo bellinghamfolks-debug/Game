@@ -116,8 +116,8 @@ def project_graph():
     configs = build_configs('Project', dict(
         IPHONEOS_DEPLOYMENT_TARGET='17.0', BUNDLE_ID='app.millionaire.arabic',
         SWIFT_VERSION='5.0', SDKROOT='iphoneos', SUPPORTED_PLATFORMS='iphoneos iphonesimulator',
-        TARGETED_DEVICE_FAMILY='1', SUPPORTS_MACCATALYST='NO', MARKETING_VERSION='2.0',
-        CURRENT_PROJECT_VERSION='2', CLANG_ENABLE_MODULES='YES', CLANG_ENABLE_OBJC_ARC='YES',
+        TARGETED_DEVICE_FAMILY='1', SUPPORTS_MACCATALYST='NO', MARKETING_VERSION='2.1',
+        CURRENT_PROJECT_VERSION='3', CLANG_ENABLE_MODULES='YES', CLANG_ENABLE_OBJC_ARC='YES',
         SWIFT_EMIT_LOC_STRINGS='NO', CODE_SIGN_STYLE='Automatic',
     ), project=True)
     attrs = {oid: ({'CreatedOnToolsVersion': '16.0'} if i == 0 else

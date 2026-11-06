@@ -26,11 +26,82 @@ final class MediaTests: XCTestCase {
         XCTAssertEqual(Millionaire.MusicTrack.station(questionNumber: 16), .stage5)
     }
 
-    func testPresenterUsesArabicOrdinalsAndVirtualWinnings() {
-        XCTAssertEqual(AnnouncerScript.question(number: 1, prize: nil), "السؤال الأول.")
-        XCTAssertTrue(AnnouncerScript.question(number: 5, prize: 1000).contains("السؤال الخامس"))
-        XCTAssertTrue(AnnouncerScript.question(number: 15, prize: 1_000_000).contains("مليون ريال"))
-        XCTAssertFalse(AnnouncerScript.question(number: 16, prize: nil).contains("ريال"))
+    func testPresenterRoutesEveryQuestionAndGameMode() {
+        XCTAssertEqual(PresenterAudio.files.count, 23)
+        XCTAssertEqual(Set(PresenterAudio.files).count, 23)
+        for number in 1...15 {
+            XCTAssertEqual(PresenterAudio.question(number: number, prize: 100), "question-" + String(number))
+            XCTAssertEqual(PresenterAudio.question(number: number, prize: nil), "question-generic")
+        }
+        XCTAssertEqual(PresenterAudio.question(number: 16, prize: 100), "question-generic")
+        XCTAssertEqual(PresenterAudio.question(number: 0, prize: 100), "question-generic")
+    }
+
+    @MainActor
+    func testAllPresenterRecordingsDecode() async throws {
+        for name in PresenterAudio.files {
+            let url = try XCTUnwrap(Bundle.main.url(forResource: name, withExtension: "m4a", subdirectory: "Audio/Presenter"), name)
+            let decoder = try AVAudioPlayer(contentsOf: url)
+            XCTAssertGreaterThan(decoder.duration, 0.25, name)
+            XCTAssertTrue(decoder.prepareToPlay(), name)
+        }
+    }
+
+    @MainActor
+    func testRecordedPresenterDucksMusicAndStopsInBackground() async throws {
+        let sound = GameSound()
+        let initial = (sound.announcerEnabled, sound.announcerVolume, sound.musicEnabled, sound.musicVolume)
+        defer {
+            sound.setActive(false)
+            sound.announcerEnabled = initial.0
+            sound.announcerVolume = initial.1
+            sound.musicEnabled = initial.2
+            sound.musicVolume = initial.3
+        }
+        sound.announcerEnabled = true
+        sound.announcerVolume = 0.9
+        sound.musicEnabled = true
+        sound.musicVolume = 0.6
+        sound.music(.stage1)
+        sound.announceQuestion(number: 1, prize: 100)
+        XCTAssertTrue(sound.isAnnouncementPlaying)
+        try await Task.sleep(for: .milliseconds(200))
+        XCTAssertEqual(sound.musicPlaybackVolume, 0.162, accuracy: 0.04)
+        sound.stopAnnouncement()
+        try await Task.sleep(for: .milliseconds(210))
+        XCTAssertFalse(sound.isAnnouncementPlaying)
+        XCTAssertEqual(sound.musicPlaybackVolume, 0.6, accuracy: 0.04)
+        sound.announceCue("correct")
+        XCTAssertTrue(sound.isAnnouncementPlaying)
+        sound.setActive(false)
+        XCTAssertFalse(sound.isAnnouncementPlaying)
+        sound.setActive(true)
+        XCTAssertTrue(sound.isMusicPlaying)
+        XCTAssertFalse(sound.isAnnouncementPlaying)
+    }
+
+    @MainActor
+    func testRecordedPresenterFinishRestoresMusic() async throws {
+        let url = try XCTUnwrap(Bundle.main.url(forResource: "correct", withExtension: "m4a", subdirectory: "Audio/Presenter"))
+        let decoder = try AVAudioPlayer(contentsOf: url)
+        let sound = GameSound()
+        let initial = (sound.announcerEnabled, sound.announcerVolume, sound.musicEnabled, sound.musicVolume)
+        defer {
+            sound.setActive(false)
+            sound.announcerEnabled = initial.0
+            sound.announcerVolume = initial.1
+            sound.musicEnabled = initial.2
+            sound.musicVolume = initial.3
+        }
+        sound.announcerEnabled = true
+        sound.announcerVolume = 0.9
+        sound.musicEnabled = true
+        sound.musicVolume = 0.6
+        sound.music(.stage3)
+        sound.announceCue("correct")
+        try await Task.sleep(for: .milliseconds(Int(decoder.duration * 1000) + 450))
+        XCTAssertFalse(sound.isAnnouncementPlaying)
+        XCTAssertEqual(sound.musicPlaybackVolume, 0.6, accuracy: 0.04)
     }
 
     @MainActor

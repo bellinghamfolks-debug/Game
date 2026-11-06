@@ -321,8 +321,11 @@ struct StudioRoot: View {
             if destination == .game { announceQuestionIfNeeded() }
             if destination == .results, let r = vm.round, r.id != lastResultAnnouncement {
                 lastResultAnnouncement = r.id
-                let score = r.mode.ladder ? "حصيلتك " + arabic(r.payout) + " ريال." : "إجاباتك الصحيحة " + arabic(r.correctCount) + "."
-                sound.announce((r.outcome ?? "اكتملت الجولة") + ". " + score)
+                if r.payout == 1_000_000 { sound.announceCue("win") }
+                else if r.timedOut == true { sound.announceCue("timeout") }
+                else if r.outcome == "انسحاب" { sound.announceCue("withdraw") }
+                else if r.outcome == "إجابة غير صحيحة" { sound.announceCue("wrong") }
+                else { sound.announceCue("correct") }
             }
         }
         .onChange(of:vm.question?.id) { _,_ in announceQuestionIfNeeded() }
@@ -337,15 +340,13 @@ struct StudioRoot: View {
                 let right = vm.round?.selected == vm.question?.correct
                 if right, let r = vm.round, [.classic,.expert].contains(r.mode), [4,9].contains(r.index) {
                     sound.cue(.milestone)
-                    sound.announce("أحسنت! ضمنت " + arabic(r.earned) + " ريال.")
+                    sound.announceCue(r.index == 4 ? "safety-1" : "safety-2")
                 } else if right {
                     sound.cue(.correct)
-                    sound.announce("إجابة صحيحة!")
+                    sound.announceCue("correct")
                 } else {
                     sound.cue(.wrong)
-                    if let q = vm.question {
-                        sound.announce((vm.round?.timedOut == true ? "انتهى الوقت. " : "إجابة غير صحيحة. ") + "الجواب هو " + q.options[q.correct])
-                    }
+                    sound.announceCue(vm.round?.timedOut == true ? "timeout" : "wrong")
                 }
             case .finished:
                 page = .results
@@ -835,10 +836,11 @@ private extension StudioRoot {
         Kicker("غرفة التحكم")
         Text("إعدادات الصوت").font(.largeTitle.bold())
         VStack(alignment: .leading, spacing: 12) {
-            Toggle("صوت المذيع", isOn: $sound.announcerEnabled).accessibilityIdentifier("announcerToggle")
+            Toggle("صوت المذيع فؤاد", isOn: $sound.announcerEnabled).accessibilityIdentifier("announcerToggle")
+            Text("تعليق عربي مولّد بالذكاء الاصطناعي، يعمل دون اتصال.").font(.caption).foregroundStyle(mist)
             Slider(value: $sound.announcerVolume, in: 0...1)
-                .accessibilityLabel("مستوى صوت المذيع").disabled(!sound.announcerEnabled)
-            Button("تجربة صوت المذيع") { sound.announce("أهلًا بك في استوديو من سيربح المليون.") }
+                .accessibilityLabel("مستوى صوت المذيع فؤاد").disabled(!sound.announcerEnabled)
+            Button("تجربة صوت فؤاد") { sound.announceCue("question-1") }
                 .foregroundStyle(gold).disabled(!sound.announcerEnabled)
         }.card().tint(gold)
         VStack(alignment:.leading,spacing:14){

@@ -35,37 +35,25 @@ enum SoundCue: String, CaseIterable {
     var file: String { self == .victory ? "win" : rawValue }
 }
 
-private final class SpeechCompletion: NSObject, AVSpeechSynthesizerDelegate {
+private final class PresenterCompletion: NSObject, AVAudioPlayerDelegate {
     var completed: (@MainActor (ObjectIdentifier) -> Void)?
 
-    private func finish(_ utterance: AVSpeechUtterance) {
-        let id = ObjectIdentifier(utterance)
+    private func finish(_ player: AVAudioPlayer) {
+        let id = ObjectIdentifier(player)
         Task { @MainActor [weak self] in self?.completed?(id) }
     }
 
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) { finish(utterance) }
-    func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) { finish(utterance) }
+    func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) { finish(player) }
+    func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) { finish(player) }
 }
 
-struct AnnouncerScript {
-    private static let ordinals = ["الأول", "الثاني", "الثالث", "الرابع", "الخامس", "السادس", "السابع",
-                                   "الثامن", "التاسع", "العاشر", "الحادي عشر", "الثاني عشر", "الثالث عشر",
-                                   "الرابع عشر", "الخامس عشر"]
+enum PresenterAudio {
+    static let cues = ["correct", "wrong", "safety-1", "safety-2", "win", "timeout", "withdraw", "question-generic"]
+    static let files = (1...15).map { "question-" + String($0) } + cues
 
     static func question(number: Int, prize: Int?) -> String {
-        guard number > 0 else { return "" }
-        let position = number <= ordinals.count ? ordinals[number - 1] : "رقم " + spelled(number)
-        guard let prize, prize > 0 else { return "السؤال " + position + "." }
-        let opening = number == 15 ? "نصل إلى سؤال المليون! " : ""
-        let value = prize == 1_000_000 ? "مليون" : spelled(prize)
-        return opening + "السؤال " + position + "، على " + value + " ريال."
-    }
-
-    private static func spelled(_ value: Int) -> String {
-        let formatter = NumberFormatter()
-        formatter.locale = Locale(identifier: "ar_SA")
-        formatter.numberStyle = .spellOut
-        return formatter.string(from: NSNumber(value: value)) ?? String(value)
+        guard prize != nil, (1...15).contains(number) else { return "question-generic" }
+        return "question-" + String(number)
     }
 }
 
@@ -85,21 +73,16 @@ final class GameSound: ObservableObject {
         didSet {
             defaults.set(announcerVolume, forKey: "announcerVolume")
             if announcerVolume <= 0 { stopAnnouncement() }
+            else { presenter?.volume = Float(announcerVolume) }
         }
     }
-    private var speech = AVSpeechSynthesizer()
-    private let speechCompletion = SpeechCompletion()
-    private var spoken: AVSpeechUtterance?
-    private lazy var arabicVoice: AVSpeechSynthesisVoice? = {
-        let installed = AVSpeechSynthesisVoice.speechVoices().filter { $0.language.lowercased().hasPrefix("ar") }
-        return installed.sorted {
-            if $0.quality != $1.quality { return $0.quality.rawValue > $1.quality.rawValue }
-            return $0.language.lowercased() == "ar-sa" && $1.language.lowercased() != "ar-sa"
-        }.first ?? AVSpeechSynthesisVoice(language: "ar-SA")
-    }()
+    private let presenterCompletion = PresenterCompletion()
+    private var presenter: AVAudioPlayer?
+    var isAnnouncementPlaying: Bool { presenter?.isPlaying == true }
+    var musicPlaybackVolume: Float { current?.volume ?? 0 }
     private var recovery: Task<Void, Never>?
     var isMusicPlaying: Bool { current?.isPlaying == true }
-    private var musicGain: Float { Float(musicVolume) * (spoken == nil ? 1.0 : 0.27) }
+    private var musicGain: Float { Float(musicVolume) * (presenter == nil ? 1.0 : 0.27) }
     private let defaults = UserDefaults.standard
     private var active = true
     private var interrupted = false
@@ -124,7 +107,7 @@ final class GameSound: ObservableObject {
         effectsEnabled = d.bool(forKey: "fxOn")
         announcerEnabled = d.bool(forKey: "announcerOn")
         announcerVolume = d.double(forKey: "announcerVolume")
-        configureSpeech()
+        configurePresenter()
         configureSession()
         let center = NotificationCenter.default
         observers.append(center.addObserver(forName: AVAudioSession.interruptionNotification, object: nil, queue: .main) { [weak self] note in
@@ -146,12 +129,10 @@ final class GameSound: ObservableObject {
         try? AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default)
     }
 
-    private func configureSpeech() {
-        speech.usesApplicationAudioSession = true
-        speech.delegate = speechCompletion
-        speechCompletion.completed = { [weak self] id in
-            guard let self, let spoken = self.spoken, ObjectIdentifier(spoken) == id else { return }
-            self.spoken = nil
+    private func configurePresenter() {
+        presenterCompletion.completed = { [weak self] id in
+            guard let self, let presenter = self.presenter, ObjectIdentifier(presenter) == id else { return }
+            self.presenter = nil
             self.adjustMusic(fade: 0.24)
         }
     }
@@ -161,27 +142,26 @@ final class GameSound: ObservableObject {
     }
 
     func announceQuestion(number: Int, prize: Int?) {
-        announce(AnnouncerScript.question(number: number, prize: prize))
+        announceCue(PresenterAudio.question(number: number, prize: prize))
     }
 
-    func announce(_ text: String) {
+    func announceCue(_ cue: String) {
         guard active, !interrupted, announcerEnabled, announcerVolume > 0,
-              !text.isEmpty, let voice = arabicVoice else { return }
+              PresenterAudio.files.contains(cue),
+              let line = player(cue, subdirectory: "Audio/Presenter") else { return }
         stopAnnouncement()
         do { try AVAudioSession.sharedInstance().setActive(true) } catch { return }
-        let line = AVSpeechUtterance(string: text)
-        line.voice = voice
-        line.rate = AVSpeechUtteranceDefaultSpeechRate * 0.94
-        line.pitchMultiplier = 0.96
+        line.delegate = presenterCompletion
         line.volume = Float(announcerVolume)
-        spoken = line
+        presenter = line
         adjustMusic(fade: 0.12)
-        speech.speak(line)
+        if !line.play() { stopAnnouncement() }
     }
 
     func stopAnnouncement() {
-        spoken = nil
-        if speech.isSpeaking || speech.isPaused { speech.stopSpeaking(at: .immediate) }
+        presenter?.delegate = nil
+        presenter?.stop()
+        presenter = nil
         adjustMusic(fade: 0.15)
     }
 
@@ -192,10 +172,10 @@ final class GameSound: ObservableObject {
             effects[sound] = (0..<(sound == .select ? 2 : 1)).compactMap { _ in player(sound.file) }
         }
     }
-    private func player(_ file: String) -> AVAudioPlayer? {
+    private func player(_ file: String, subdirectory: String = "Audio") -> AVAudioPlayer? {
         let bundle = Bundle.main
-        guard let url = bundle.url(forResource: file, withExtension: "m4a", subdirectory: "Audio") ??
-                bundle.url(forResource: file, withExtension: "m4a") else { return nil }
+        let flattened = subdirectory == "Audio" ? bundle.url(forResource: file, withExtension: "m4a") : nil
+        guard let url = bundle.url(forResource: file, withExtension: "m4a", subdirectory: subdirectory) ?? flattened else { return nil }
         guard let result = try? AVAudioPlayer(contentsOf: url) else { return nil }
         result.prepareToPlay()
         return result
@@ -338,10 +318,8 @@ final class GameSound: ObservableObject {
         haptics = nil
         players.removeAll()
         interrupted = false
-        spoken = nil
-        speech.delegate = nil
-        speech = AVSpeechSynthesizer()
-        configureSpeech()
+        stopAnnouncement()
+        configurePresenter()
         configureSession()
         warmEffects()
         synchronize()
