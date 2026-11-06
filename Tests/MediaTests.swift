@@ -5,8 +5,8 @@ import XCTest
 final class MediaTests: XCTestCase {
     @MainActor
     func testBundledScoreAndEffectsOpenOnAppleDecoder() async throws {
-        let names = Set(MusicTrack.allCases.map(\.rawValue) + SoundCue.allCases.map(\.file))
-        XCTAssertEqual(names.count, MusicTrack.allCases.count + SoundCue.allCases.count)
+        let names = Set(Millionaire.MusicTrack.allCases.map(\.rawValue) + SoundCue.allCases.map(\.file))
+        XCTAssertEqual(names.count, Millionaire.MusicTrack.allCases.count + SoundCue.allCases.count)
         for name in names.sorted() {
             let url = try XCTUnwrap(Bundle.main.url(forResource: name, withExtension: "m4a", subdirectory: "Audio") ??
                 Bundle.main.url(forResource: name, withExtension: "m4a"), name)
@@ -17,13 +17,13 @@ final class MediaTests: XCTestCase {
         }
     }
     func testQuestionGroupsHaveIndependentMusic() {
-        let expected: [MusicTrack] = [.stage1, .stage2, .stage3, .stage4, .stage5]
+        let expected: [Millionaire.MusicTrack] = [.stage1, .stage2, .stage3, .stage4, .stage5]
         for (index, track) in expected.enumerated() {
             for question in (index * 3 + 1)...(index * 3 + 3) {
-                XCTAssertEqual(MusicTrack.station(questionNumber: question), track)
+                XCTAssertEqual(Millionaire.MusicTrack.station(questionNumber: question), track)
             }
         }
-        XCTAssertEqual(MusicTrack.station(questionNumber: 16), .stage5)
+        XCTAssertEqual(Millionaire.MusicTrack.station(questionNumber: 16), .stage5)
     }
 
     func testPresenterUsesArabicOrdinalsAndVirtualWinnings() {
