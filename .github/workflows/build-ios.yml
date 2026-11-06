@@ -11,7 +11,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: millionaire-validated-${{ github.ref }}
+  group: millionaire-validated-${{ github.sha }}
   cancel-in-progress: true
 jobs:
   build:
